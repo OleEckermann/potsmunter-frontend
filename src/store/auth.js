@@ -36,22 +36,18 @@ export default {
                 commit('clearAll')
             }
         },
-        async login({commit}, credentials) {
-            try {
-                commit('loading', true, {root: true})
-                await axiosInstance.post('/login', credentials).then(response => {
-                    commit('token', response.data)
-                })
-                await axiosInstance.get('/users', {
+        login({commit}, credentials) {
+            commit('loading', true, {root: true})
+            return axiosInstance.post('/login', credentials).then(response => {
+                commit('token', response.data)
+                axiosInstance.get('/users', {
                     params: {
                         username: credentials.username
                     }
                 }).then(response => {
                     commit('user', response.data)
                 })
-            } finally {
-                commit('loading', false, {root: true})
-            }
+            }).finally(() => commit('loading', false, {root: true}))
         },
         changePassword({state, commit}, passwordObj) {
             return axiosInstance.post(`/users/${state.user.id}/password`, passwordObj).then(response => {
