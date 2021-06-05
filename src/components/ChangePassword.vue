@@ -12,36 +12,65 @@
         <li>'Und es war Sommer'</li>
       </div>
     </div>
-    <form @submit.prevent="changePassword(credentials)">
+    <validation-observer tag="form"
+                         v-slot="{invalid}"
+                         ref="formStatus"
+                         @submit.prevent="submit"
+                         @keydown.enter.prevent>
       <input type="text" hidden="true" id="username" name="username" autocomplete="username"
              :value="user.credentials.username"/>
       <div class="field">
-        <label for="currentPasswordInput" class="label">Aktuelles Passwort</label>
-        <div class="control">
-          <input id="currentPasswordInput" class="input is-focused" type="password" v-model="credentials.currentPassword"
-                 autocomplete="current-password"/>
-        </div>
+        <validation-provider vid="currentPassword" name="Passwort" rules="required" v-slot="{errors}">
+          <label for="currentPasswordInput" class="label">Aktuelles Passwort</label>
+          <div class="control">
+            <input id="currentPasswordInput"
+                   class="input"
+                   :class="{'is-danger': errors.length > 0}"
+                   type="password"
+                   v-model="credentials .currentPassword"
+                   autofocus
+                   autocomplete="current-password"/>
+          </div>
+          <p v-if="errors.length > 0" class="help is-danger">{{ errors[0] }}</p>
+        </validation-provider>
       </div>
       <div class="field">
-        <label for="newPasswordInput" class="label">Neues Passwort</label>
-        <div class="control">
-          <input id="newPasswordInput" class="input" type="password" v-model="credentials.newPassword"
-                 autocomplete="new-password"/>
-        </div>
+        <validation-provider vid="newPassword" name="Neues Passwort" rules="required" v-slot="{errors}">
+          <label for="newPasswordInput" class="label">Neues Passwort</label>
+          <div class="control">
+            <input id="newPasswordInput"
+                   class="input"
+                   :class="{'is-danger': errors.length > 0}"
+                   type="password"
+                   v-model="credentials.newPassword"
+                   autocomplete="new-password"/>
+          </div>
+          <p v-if="errors.length > 0" class="help is-danger">{{ errors[0] }}</p>
+        </validation-provider>
       </div>
       <div class="field">
-        <label for="newPasswordRepeatInput" class="label">Neues Passwort wiederholen</label>
-        <div class="control">
-          <input id="newPasswordRepeatInput" class="input" type="password" v-model="credentials.newPasswordRepeat"
-                 autocomplete="new-password"/>
-        </div>
+        <validation-provider vid="newPasswordRepeat"
+                             name="Passwort-Wiederholung"
+                             rules="required|password:@newPassword"
+                             v-slot="{errors}">
+          <label for="newPasswordRepeatInput" class="label">Neues Passwort wiederholen</label>
+          <div class="control">
+            <input id="newPasswordRepeatInput" class="input" type="password" v-model="credentials.newPasswordRepeat"
+                   autocomplete="new-password"/>
+          </div>
+          <p v-if="errors.length > 0" class="help is-danger">{{ errors[0] }}</p>
+        </validation-provider>
       </div>
       <div class="field">
         <div class="control">
-          <input class="button is-primary" type="submit" value="Passwort ändern"/>
+          <input class="button is-primary"
+                 :class="{disabled: invalid}"
+                 :disabled="invalid"
+                 type="submit"
+                 value="Passwort ändern"/>
         </div>
       </div>
-    </form>
+    </validation-observer>
   </div>
 </template>
 
@@ -62,7 +91,12 @@ export default {
     ...mapGetters(['user']),
   },
   methods: {
-    ...mapActions(['changePassword'])
+    ...mapActions(['changePassword']),
+    submit() {
+      this.changePassword(this.credentials).catch(error => {
+        this.$refs.formStatus.setErrors(error.response.data)
+      })
+    }
   }
 }
 </script>

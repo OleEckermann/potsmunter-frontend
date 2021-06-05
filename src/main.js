@@ -5,8 +5,13 @@ import store from './store'
 import axiosInstance from "@/axiosInstance"
 import '@/assets/custom.scss'
 
-Vue.prototype.$api = axiosInstance
+// Form validation
+import {ValidationProvider, ValidationObserver} from 'vee-validate';
+import '@/validation.js'
+Vue.component('ValidationProvider', ValidationProvider);
+Vue.component('ValidationObserver', ValidationObserver);
 
+Vue.prototype.$api = axiosInstance
 Vue.config.productionTip = false
 
 new Vue({

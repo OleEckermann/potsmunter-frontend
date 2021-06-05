@@ -53,11 +53,10 @@ export default {
                 commit('loading', false, {root: true})
             }
         },
-        changePassword({commit, state}, passwordObj) {
-            console.log(passwordObj, commit)
-            axiosInstance.post(`/users/${state.user.id}/password`, passwordObj).then(response => {
-                console.log(response.data)
-            }).catch(error => console.error(error))
+        changePassword({state, commit}, passwordObj) {
+            return axiosInstance.post(`/users/${state.user.id}/password`, passwordObj).then(response => {
+                commit('user', response.data)
+            })
         }
     },
     getters: {
