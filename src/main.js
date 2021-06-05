@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import App from './App.vue'
-import './registerServiceWorker'
 import router from './router'
 import store from './store'
+import axiosInstance from "@/axiosInstance"
+import '@/assets/custom.scss'
+
+Vue.prototype.$api = axiosInstance
 
 Vue.config.productionTip = false
 
