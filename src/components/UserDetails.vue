@@ -26,11 +26,12 @@
           </validation-provider>
         </div>
         <div class="field">
-          <validation-provider vid="password" name="Passwort" rules="password" v-slot="{errors}">
-            <label for="passwordEdit" class="label">Passwort</label>
-            <span class="help is-info">Muss beim ersten Anmelden geändert werden. Der Nutzer muss über eine Änderung informiert werden.</span>
+          <validation-provider vid="password" name="Initialpasswort" :rules="'initialPassword' + (user.id > 0 ? '' : '|required')" v-slot="{errors}">
+            <label for="passwordEdit" class="label">Initialpasswort</label>
+            <span class="help is-info">Mindestens 5 Zeichen. Muss beim ersten oder nächsten Anmelden geändert werden. Der Nutzer muss über eine Änderung informiert werden. </span>
             <div id="passwordEdit" class="control">
-              <input type="password" class="input" v-model="password">
+              <input type="text" class="input" v-model="password"
+              :placeholder="(user.id > 0 ? 'leer lassen, falls unverändert' : '')">
             </div>
             <p class="help is-danger">{{ errors[0] }}</p>
           </validation-provider>

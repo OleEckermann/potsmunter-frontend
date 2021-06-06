@@ -5,7 +5,7 @@
                          v-slot="{invalid}"
                          ref="formStatus"
                          @submit.prevent="submit"
-                         @keydown.enter.prevent>
+                         @keydown.enter.prevent="submit">
       <div class="field">
         <validation-provider vid="username" name="Nutzername" rules="required" v-slot="{errors}">
           <label for="usernameInput" class="label">Nutzername</label>
@@ -21,7 +21,6 @@
           <label for="passwordInput" class="label">Passwort</label>
           <div class="control">
             <input id="passwordInput" class="input" type="password" v-model="credentials.password"
-                   placeholder="mind. 16 beliebige Zeichen"
                    autocomplete="current-password"/>
           </div>
           <p v-if="errors.length > 0" class="help is-danger">{{ errors[0] }}</p>

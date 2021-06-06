@@ -1,9 +1,18 @@
 import {extend} from 'vee-validate';
 import {required, email} from 'vee-validate/dist/rules';
 
+extend('initialPassword', {
+    validate(value) {
+        if (!value)
+            return true
+        return value.length >= 5;
+    },
+    message: 'Das initiale Passwort muss mindestens 5 Zeichen haben'
+})
+
 extend('password', {
     params: ['target'],
-    validate(value, { target }) {
+    validate(value, {target}) {
         return value === target;
     },
     message: 'Die beiden Passwörter stimmen nicht überein'
@@ -11,7 +20,7 @@ extend('password', {
 
 extend('password', {
     validate(value) {
-        if(!value)
+        if (!value)
             return true
         return value.length >= 15;
     },
