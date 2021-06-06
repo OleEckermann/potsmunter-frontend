@@ -7,13 +7,18 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'home',
     component: HomeView
   },
   {
     path: '/anmelden',
-    name: 'Anmelden',
-    component: () => import(/* webpackChunkName: "about" */ '../views/LoginView.vue')
+    name: 'login',
+    component: () => import('../views/LoginView.vue')
+  },
+  {
+    path: '/benutzerverwaltung',
+    name: 'userManagement',
+    component: () => import('../views/UserManagementView.vue')
   }
 ]
 

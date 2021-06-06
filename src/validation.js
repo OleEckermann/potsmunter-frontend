@@ -9,6 +9,15 @@ extend('password', {
     message: 'Die beiden Passwörter stimmen nicht überein'
 });
 
+extend('password', {
+    validate(value) {
+        if(!value)
+            return true
+        return value.length >= 15;
+    },
+    message: 'Das Passwort muss mindestens 15 Zeichen haben'
+});
+
 extend('required', {
     ...required,
     message: '{_field_} darf nicht leer sein'

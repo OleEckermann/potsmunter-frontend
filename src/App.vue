@@ -1,18 +1,25 @@
 <template>
   <div id="app">
-    <router-view v-if="loggedIn && user && !user.credentials.initial"/>
-    <LoginView v-else/>
+    <navigation v-if="readyToUse"/>
+    <div class="container">
+      <router-view v-if="readyToUse"/>
+      <LoginView v-else/>
+    </div>
   </div>
 </template>
 
 <script>
 import LoginView from "@/views/LoginView";
+import Navigation from "@/components/Navigation"
 import {mapGetters} from "vuex";
 
 export default {
   computed: {
-    ...mapGetters(['loggedIn', 'user'])
+    ...mapGetters(['loggedIn', 'user']),
+    readyToUse() {
+      return this.loggedIn && this.user && this.user.credentials && !this.user.credentials.initial
+    }
   },
-  components: {LoginView}
+  components: {LoginView, Navigation}
 }
 </script>

@@ -45,7 +45,7 @@ export default {
                         username: credentials.username
                     }
                 }).then(response => {
-                    commit('user', response.data)
+                    commit('user', response.data[0])
                 })
             }).finally(() => commit('loading', false, {root: true}))
         },
@@ -57,7 +57,7 @@ export default {
     },
     getters: {
         loggedIn(state) {
-            return state.token
+            return state.token !== undefined
         },
         user(state) {
             return state.user
