@@ -14,40 +14,42 @@
 
     <div id="navbarBasicExample" class="navbar-menu">
       <div class="navbar-start">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <router-link v-slot="{navigate}"
+                       :to="{name: 'treatmentAssignment'}"
+                       custom>
+            <a class="navbar-item is-tab"
+               :class="{'is-active': $route.name === 'treatmentAssignment'}"
+               @click="navigate">
+              Verordnungen
+            </a>
+          </router-link>
+
+          <div class="navbar-dropdown">
+            <router-link v-slot="{navigate}"
+                         :to="{name: 'treatmentAssignment'}"
+                         custom>
+              <a class="navbar-item"
+                 :class="{'is-active': $route.name === 'treatmentAssignment'}"
+                 @click="navigate">
+                Behandlungen zuweisen
+              </a>
+            </router-link>
+            <a class="navbar-item">
+              Unbearbeitete Verordnungen anzeigen
+            </a>
+          </div>
+        </div>
         <router-link v-slot="{navigate}"
                      :to="{name: 'userManagement'}"
                      custom>
           <a class="navbar-item is-tab"
-               :class="{'is-active': $route.name === 'userManagement'}"
-               @click="navigate">
+             :class="{'is-active': $route.name === 'userManagement'}"
+             @click="navigate">
             Benutzerverwaltung
           </a>
         </router-link>
-        <a class="navbar-item">
-          Documentation
-        </a>
 
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link">
-            More
-          </a>
-
-          <div class="navbar-dropdown">
-            <a class="navbar-item">
-              About
-            </a>
-            <a class="navbar-item">
-              Jobs
-            </a>
-            <a class="navbar-item">
-              Contact
-            </a>
-            <hr class="navbar-divider">
-            <a class="navbar-item">
-              Report an issue
-            </a>
-          </div>
-        </div>
       </div>
 
       <div class="navbar-end">
@@ -65,3 +67,12 @@
     </div>
   </nav>
 </template>
+
+<style lang="scss" scoped>
+@import "@/assets/custom.scss";
+
+nav {
+  border-bottom: 1px solid $pink;
+  padding: 0px 15px;
+}
+</style>

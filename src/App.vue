@@ -1,8 +1,8 @@
 <template>
   <div id="app">
+    <navigation v-if="readyToUse"/>
     <div class="container" v-if="readyToUse">
-      <navigation v-if="readyToUse"/>
-      <router-view v-if="readyToUse"/>
+      <router-view class="mt-5" v-if="readyToUse"/>
     </div>
     <div class="container" v-else>
       <LoginView/>
