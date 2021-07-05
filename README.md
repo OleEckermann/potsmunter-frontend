@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # mpt-frontend
 
 ## Project setup
@@ -32,3 +33,6 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+=======
+# potsmunter-frontend
+>>>>>>> 4f9fa670cba200790e4b76087ec09861d15b6b76
