@@ -1,9 +1,11 @@
 <template>
   <div id="app">
-    <navigation v-if="readyToUse"/>
-    <div class="container">
+    <div class="container" v-if="readyToUse">
+      <navigation v-if="readyToUse"/>
       <router-view v-if="readyToUse"/>
-      <LoginView v-else/>
+    </div>
+    <div class="container" v-else>
+      <LoginView/>
     </div>
   </div>
 </template>
@@ -15,10 +17,7 @@ import {mapGetters} from "vuex";
 
 export default {
   computed: {
-    ...mapGetters(['loggedIn', 'user']),
-    readyToUse() {
-      return this.loggedIn && this.user && this.user.credentials && !this.user.credentials.initial
-    }
+    ...mapGetters(['readyToUse']),
   },
   components: {LoginView, Navigation}
 }

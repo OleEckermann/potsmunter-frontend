@@ -61,6 +61,9 @@ export default {
         },
         user(state) {
             return state.user
+        },
+        readyToUse(state) {
+            return state.user && state.token;
         }
     }
 }

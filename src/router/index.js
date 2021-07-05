@@ -11,6 +11,11 @@ const routes = [
     component: HomeView
   },
   {
+    path: '/zuordnen',
+    name: 'treatment-assignment',
+    component: () => import('../views/TreatmentAssignmentView')
+  },
+  {
     path: '/anmelden',
     name: 'login',
     component: () => import('../views/LoginView.vue')
