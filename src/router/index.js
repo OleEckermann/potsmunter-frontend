@@ -20,6 +20,11 @@ const routes = [
     component: () => import('../views/LoginView.vue')
   },
   {
+    path: '/berichte',
+    name: 'reports',
+    component: () => import('../views/ReportsView.vue')
+  },
+  {
     path: '/benutzerverwaltung',
     name: 'userManagement',
     component: () => import('../views/UserManagementView.vue')

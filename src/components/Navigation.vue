@@ -36,6 +36,15 @@
           </div>
         </div>
         <router-link v-slot="{navigate}"
+                     :to="{name: 'reports'}"
+                     custom>
+          <a class="navbar-item is-tab"
+             :class="{'is-active': $route.name === 'reports'}"
+             @click="navigate">
+            Berichte
+          </a>
+        </router-link>
+        <router-link v-slot="{navigate}"
                      :to="{name: 'userManagement'}"
                      custom>
           <a class="navbar-item is-tab"
