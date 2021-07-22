@@ -28,7 +28,12 @@
       {{ prescription.patient }} / {{ prescription.date | date }}
     </div>
     <div class="block" v-if="treatments.length > 0">
-      <table class="table is-bordered">
+      <table class="table is-bordered is-fullwidth">
+        <tr>
+          <th>Datum</th>
+          <th>Behandlungen</th>
+          <th>TherapeutIn</th>
+        </tr>
         <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
           <td>{{ treatment.date | date }}</td>
           <td>
@@ -47,7 +52,7 @@
                    type="text"
                    :list="'therapistDataList_' + treatment.id"
                    @input="handleTherapistInput(treatment, $event)"
-                   @keydown="checkSaveKeyPressed($event)"/>
+                   @keydown.stop="checkShortcutPressed($event, idx)"/>
             <datalist :id="'therapistDataList_' + treatment.id">
               <option v-for="therapist in treatment.therapistDataList" :key="treatment.id + '_' + therapist.number"
                       :value="'[' + therapist.number + '] ' + therapist.name"/>
@@ -56,11 +61,19 @@
         </tr>
         <tr>
           <td colspan="3" class="has-text-right">
-            <button class="button is-primary"
-                    :disabled="!dirty"
-                    @click="savePrescription">
-              Speichern
-            </button>
+            <div class="buttons is-pulled-right">
+              <button class="button is-danger"
+                      :disabled="!dirty"
+                      tabindex="-1"
+                      @click="cancel">
+                Abbrechen
+              </button>
+              <button class="button is-primary"
+                      :disabled="!dirty"
+                      @click="savePrescription">
+                Speichern
+              </button>
+            </div>
           </td>
         </tr>
       </table>
@@ -158,18 +171,36 @@ export default {
         }
         this.dirty = true
         if (idx + 1 < this.treatments.length) {
-          this.$nextTick(() => {
-            this.$refs['therapistInput_' + (idx + 1)][0].focus()
-            this.$refs['therapistInput_' + (idx + 1)][0].select()
-          })
+          this.selectTherapistInput(idx + 1)
         }
       }
     },
-    checkSaveKeyPressed(e) {
+    checkShortcutPressed(e, inputFieldIdx) {
       if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.savePrescription()
+      } else if (e.keyCode === 38) {
+        if (inputFieldIdx > 0) {
+          this.selectTherapistInput(inputFieldIdx - 1)
+        }
+      } else if (e.keyCode === 40) {
+        if (inputFieldIdx < this.treatments.length - 1)
+          this.selectTherapistInput(inputFieldIdx + 1)
+      } else if(e.keyCode === 27){
+        this.cancel()
       }
+    },
+    selectTherapistInput(idx) {
+      this.$nextTick(() => {
+        let el = this.$refs['therapistInput_' + idx][0]
+        el.focus()
+        window.setTimeout(function () {
+          el.select()
+        }, 1)
+      })
+    },
+    cancel() {
+      this.loadPrescription()
     }
   }
 }

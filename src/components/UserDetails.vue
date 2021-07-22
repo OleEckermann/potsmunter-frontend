@@ -26,12 +26,13 @@
           </validation-provider>
         </div>
         <div class="field">
-          <validation-provider vid="password" name="Initialpasswort" :rules="'initialPassword' + (user.id > 0 ? '' : '|required')" v-slot="{errors}">
+          <validation-provider vid="password" name="Initialpasswort"
+                               :rules="'initialPassword' + (user.id > 0 ? '' : '|required')" v-slot="{errors}">
             <label for="passwordEdit" class="label">Initialpasswort</label>
             <span class="help is-info">Mindestens 5 Zeichen. Muss beim ersten oder nächsten Anmelden geändert werden. Der Nutzer muss über eine Änderung informiert werden. </span>
             <div id="passwordEdit" class="control">
               <input type="text" class="input" v-model="password"
-              :placeholder="(user.id > 0 ? 'leer lassen, falls unverändert' : '')">
+                     :placeholder="(user.id > 0 ? 'leer lassen, falls unverändert' : '')">
             </div>
             <p class="help is-danger">{{ errors[0] }}</p>
           </validation-provider>
@@ -46,14 +47,15 @@
           </validation-provider>
         </div>
         <div class="field has-text-right">
+          <div class="button is-danger mr-2"
+               @click="deleteUser"
+               :disabled="!editedUser || !editedUser.id">
+            Nutzer löschen
+          </div>
           <input type="submit"
                  class="button is-primary"
                  :disabled="invalid"
                  value="Speichern"/>
-          <div class="button is-danger ml-2"
-               @click="deleteUser">
-            Nutzer löschen
-          </div>
         </div>
       </validation-observer>
     </div>

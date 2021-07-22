@@ -5,14 +5,9 @@
         <img src="/favicon.ico" height="28">
       </a>
 
-      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-      </a>
     </div>
 
-    <div id="navbarBasicExample" class="navbar-menu">
+    <div id="navbarBasicExample" class="navbar-menu is-active">
       <div class="navbar-start">
         <div class="navbar-item has-dropdown is-hoverable">
           <router-link v-slot="{navigate}"
@@ -53,14 +48,13 @@
       </div>
 
       <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            <a class="button is-primary">
-              <strong>Sign up</strong>
-            </a>
-            <a class="button is-light">
-              Log in
-            </a>
+        <div class="navbar-item" v-if="user">
+          <div class="icon-text has-icons-right">
+            <span>{{ user.name }}</span>
+            <span class="icon is-link is-hoverable">
+              <icon icon="power-off"
+                    @click.prevent="performLogout"/>
+            </span>
           </div>
         </div>
       </div>
@@ -68,8 +62,26 @@
   </nav>
 </template>
 
+<script>
+import {mapActions, mapGetters} from "vuex";
+
+export default {
+  computed: {
+    ...mapGetters(['user'])
+  },
+  methods: {
+    ...mapActions(['logout']),
+    performLogout() {
+      this.logout().then(() => this.showMessage({
+        message: 'Sie wurden abgemeldet.',
+        type: 'warning'
+      }))
+    }
+  }
+}
+</script>
 <style lang="scss" scoped>
-@import "@/assets/custom.scss";
+@import "~@/assets/custom.scss";
 
 nav {
   border-bottom: 1px solid $pink;

@@ -26,8 +26,16 @@ $control-border-width: 2px;
 $input-shadow: none;
 
 $primary: $green;
-$danger: $yellow;
+$warning: $yellow;
+$danger: $red;
 $link: $pink;
 
 @import "~bulma/bulma.sass";
+
+$vt-color-success: $green;
+$vt-color-warning: $warning;
+$vt-color-error: $danger;
+@import "~vue-toastification/src/scss/index.scss";
+
+
 

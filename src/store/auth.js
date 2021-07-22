@@ -49,6 +49,9 @@ export default {
                 })
             }).finally(() => commit('loading', false, {root: true}))
         },
+        logout({commit}) {
+            commit('clearAll')
+        },
         changePassword({state, commit}, passwordObj) {
             return axiosInstance.post(`/users/${state.user.id}/password`, passwordObj).then(response => {
                 commit('user', response.data)
@@ -63,7 +66,7 @@ export default {
             return state.user
         },
         readyToUse(state) {
-            return state.user && state.token;
+            return state.user && state.token && !state.user.credentials.initial;
         }
     }
 }

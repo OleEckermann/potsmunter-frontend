@@ -13,14 +13,12 @@ import '@/validation.js'
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
 
-// vue-toastification
-import Toast, {POSITION} from 'vue-toastification'
-import "vue-toastification/dist/index.css";
-
 // vou-debounce
 import vueDebounce from 'vue-debounce'
 Vue.use(vueDebounce)
 
+// vue-toastification
+import Toast, {POSITION} from 'vue-toastification'
 const options = {
     position: POSITION.BOTTOM_RIGHT
 };
