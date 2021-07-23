@@ -6,17 +6,29 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
     state: {
-        loading: false
+        loading: false,
+        message: ''
     },
     mutations: {
-        loading(state, loading) {
-            state.loading = loading
+        loading(state, {message, loadingState}) {
+            state.message = message
+            state.loading = loadingState
         }
     },
-    actions: {},
+    actions: {
+        startLoading({commit}, message) {
+            commit('loading', {message, loadingState: true})
+        },
+        stopLoading({commit}) {
+            commit('loading', {message: '', loadingState: false})
+        }
+    },
     getters: {
-        isLoading(state) {
+        loading(state) {
             return state.loading
+        },
+        loadingMessage(state){
+            return state.message
         }
     },
     modules: {

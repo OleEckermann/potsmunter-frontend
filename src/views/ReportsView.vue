@@ -7,9 +7,39 @@
       {{ date.toFormat('MMM') }}&nbsp;{{ date.toFormat('yy') }}
       <span class="icon button" @click="navigate(1)"><icon icon="chevron-right"></icon></span>
     </div>
-    <div class="block">
+    <div class="block box">
+      <div v-if="!noUnassignedPrescriptions"
+           class="icon-text">
+        <icon class="icon has-text-danger" size="2x" icon="times-circle"/>
+        <span class="is-bold has-text-danger is-clickable">
+          {{ unassignedPrescriptionCount }}
+        </span>
+        &nbsp;von {{ prescriptionCount }} Verordnung<span v-if="unassignedPrescriptionCount > 1">en</span>&nbsp;in
+        diesem Abrechnungszeitraum
+        {{ unassignedPrescriptionCount === 1 ? 'ist' : 'sind' }} noch keiner TherapeutIn zugewiesen.
+      </div>
+      <div v-else
+           class="icon-text">
+        <icon class="icon has-text-success" size="2x" icon="check-circle"/>
+        Alle&nbsp;
+        <span class="is-bold has-text-success">{{ assignedPrescriptionCount }}</span>
+        &nbsp;Behandlungen der Verordnungen in diesem Abrechnungszeitraum sind Therapeuten zugewiesen.
+      </div>
+      <div class="buttons mt-5">
+        <div class="button is-info" v-if="unassignedPrescriptionCount > 0">Bearbeiten</div>
+        <div class="button is-warning"
+             v-if="unassignedPrescriptionCount > 0"
+             @click="downloadReport"
+             target="_parent">
+          Ignorieren und Berichte erstellen
+        </div>
+        <div class="button is-primary" v-if="unassignedPrescriptionCount === 0">Berichte erstellen</div>
+      </div>
+    </div>
+    <div class="block box">
       <div v-if="noLogsAvailable">Es liegen zu diesem Monat noch keine Informationen zu Berichten vor.</div>
     </div>
+    <!--
     <form>
       <div class="field">
         <label for="therapistSelector">Report ansehen für</label>
@@ -28,13 +58,13 @@
         </div>
       </div>
     </form>
-    <div class="box report-box">
-    </div>
+    -->
   </div>
 </template>
 
 <script>
 import {DateTime} from "luxon";
+import {mapActions} from "vuex";
 
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
@@ -47,20 +77,63 @@ export default {
     }
   },
   computed: {
+    year() {
+      return this.date.year
+    },
+    month() {
+      return this.date.month
+    },
     noLogsAvailable() {
       return this.reportInfo?.logs?.length === 0
+    },
+    noUnassignedPrescriptions() {
+      return this.unassignedPrescriptionCount === 0
+    },
+    unassignedPrescriptionCount() {
+      return this.reportInfo?.unassignedPrescriptions?.length || 0
+    },
+    assignedPrescriptionCount() {
+      return this.reportInfo?.assignedPrescriptionCount || 0
+    },
+    prescriptionCount() {
+      return this.unassignedPrescriptionCount + this.assignedPrescriptionCount
     }
   },
   watch: {
-    date() {
-      this.$api.get(`/reports/${this.date.year}/${this.date.month}`)
-          .then(response => this.reportInfo = response.data)
-          .catch(error => this.handleError(error))
+    date: {
+      immediate: true,
+      handler: function () {
+        this.$api.get(`/reports/${this.date.year}/${this.date.month}`)
+            .then(response => this.reportInfo = response.data)
+            .catch(error => this.handleError(error))
+      }
     }
   },
   methods: {
+    ...mapActions(['startLoading', 'stopLoading']),
     navigate(n) {
       this.date = this.date.plus({month: n})
+    },
+    downloadReport() {
+      this.startLoading('Berichte werden generiert')
+      this.$api.post(`/reports/${this.year}/${this.month}`, {}, {
+        responseType: 'blob'
+      }).then(response => {
+        console.log(response)
+        let blob
+        try {
+          blob = new Blob([response.data], {type: 'application/zip'})
+        } catch (e) {
+          let BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder ||
+              window.MozBlobBuilder || window.MSBlobBuilder
+          let builder = new BlobBuilder()
+          builder.append(response.data)
+          blob = builder.getBlob('application/zip');
+        }
+        let blobURL = window.webkitURL.createObjectURL(blob)
+        window.open(blobURL)
+      }).catch(error => this.handleError(error))
+          .finally(() => this.stopLoading())
     },
     therapistQueryUpdated() {
       this.$api.get('/therapists', {
@@ -70,7 +143,8 @@ export default {
       }).then(response => {
         this.therapists = response.data
       })
-    },
+    }
+    ,
     handleTherapistInput() {
       let therapist = this.therapists.find(t => therapistStr(t) === this.therapistQuery);
       if (therapist) {
