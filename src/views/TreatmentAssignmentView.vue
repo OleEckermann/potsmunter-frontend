@@ -35,7 +35,7 @@
           <th>TherapeutIn</th>
         </tr>
         <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
-          <td>{{ treatment.date | date }}</td>
+          <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing">*</span></td>
           <td>
             <span v-for="(therapy, idx) in treatment.therapies"
                   :key="'therapy_' + idx">
@@ -77,6 +77,9 @@
           </td>
         </tr>
       </table>
+      <div v-if="showDeliveryDateWarning">
+        * Datum fehlte im Datensatz (Verordnungsdatum wird verwendet)
+      </div>
     </div>
   </div>
 </template>
@@ -97,6 +100,9 @@ export default {
   computed: {
     treatments() {
       return this.prescription ? this.prescription.treatments : []
+    },
+    showDeliveryDateWarning(){
+      return this.prescription.treatments.filter(t => t.treatmentDateMissing).length > 0
     }
   },
   methods: {

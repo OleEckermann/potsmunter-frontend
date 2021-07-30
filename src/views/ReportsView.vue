@@ -23,7 +23,7 @@
         <icon class="icon has-text-success" size="2x" icon="check-circle"/>
         Alle&nbsp;
         <span class="is-bold has-text-success">{{ assignedPrescriptionCount }}</span>
-        &nbsp;Behandlungen der Verordnungen in diesem Abrechnungszeitraum sind Therapeuten zugewiesen.
+        &nbsp;Behandlungen der Verordnungen in diesem Abrechnungszeitraum sind TherapeutInnen zugewiesen.
       </div>
       <div class="buttons mt-5">
         <div class="button is-info" v-if="unassignedPrescriptionCount > 0">Bearbeiten</div>
@@ -33,11 +33,25 @@
              target="_parent">
           Ignorieren und Berichte erstellen
         </div>
-        <div class="button is-primary" v-if="unassignedPrescriptionCount === 0">Berichte erstellen</div>
+        <div class="button is-primary"
+             v-if="unassignedPrescriptionCount === 0"
+             @click="downloadReport">
+          Berichte erstellen
+        </div>
       </div>
     </div>
-    <div class="block box">
+    <div class="heading">Berichts-Audit</div>
+    <div class="table-container">
       <div v-if="noLogsAvailable">Es liegen zu diesem Monat noch keine Informationen zu Berichten vor.</div>
+      <div v-else>
+        <table class="table">
+          <tr v-for="log in reportInfo.logs" :key="'log_'+log.id">
+            <td>{{ log.createdDate|dateTime }}</td>
+            <td>{{ log.userName }}</td>
+            <td>{{ log.comment }}</td>
+          </tr>
+        </table>
+      </div>
     </div>
     <!--
     <form>
@@ -103,14 +117,17 @@ export default {
     date: {
       immediate: true,
       handler: function () {
-        this.$api.get(`/reports/${this.date.year}/${this.date.month}`)
-            .then(response => this.reportInfo = response.data)
-            .catch(error => this.handleError(error))
+        this.loadReportInfo()
       }
     }
   },
   methods: {
     ...mapActions(['startLoading', 'stopLoading']),
+    loadReportInfo() {
+      this.$api.get(`/reports/${this.date.year}/${this.date.month}`)
+          .then(response => this.reportInfo = response.data)
+          .catch(error => this.handleError(error))
+    },
     navigate(n) {
       this.date = this.date.plus({month: n})
     },
@@ -118,22 +135,25 @@ export default {
       this.startLoading('Berichte werden generiert')
       this.$api.post(`/reports/${this.year}/${this.month}`, {}, {
         responseType: 'blob'
-      }).then(response => {
-        console.log(response)
-        let blob
-        try {
-          blob = new Blob([response.data], {type: 'application/zip'})
-        } catch (e) {
-          let BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder ||
-              window.MozBlobBuilder || window.MSBlobBuilder
-          let builder = new BlobBuilder()
-          builder.append(response.data)
-          blob = builder.getBlob('application/zip');
-        }
-        let blobURL = window.webkitURL.createObjectURL(blob)
-        window.open(blobURL)
-      }).catch(error => this.handleError(error))
+      })
+          .then(response => {
+            console.log(response)
+            let blob
+            try {
+              blob = new Blob([response.data], {type: 'application/zip'})
+            } catch (e) {
+              let BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder ||
+                  window.MozBlobBuilder || window.MSBlobBuilder
+              let builder = new BlobBuilder()
+              builder.append(response.data)
+              blob = builder.getBlob('application/zip');
+            }
+            let blobURL = window.webkitURL.createObjectURL(blob)
+            window.open(blobURL)
+          })
+          .catch(error => this.handleError(error))
           .finally(() => this.stopLoading())
+          .then(() => this.loadReportInfo())
     },
     therapistQueryUpdated() {
       this.$api.get('/therapists', {

@@ -38,6 +38,13 @@ Vue.filter('date', function (d) {
     return dt.toFormat('dd.MM.yy')
 });
 
+Vue.filter('dateTime', function (d) {
+    if (!d)
+        return '';
+    let dt = DateTime.fromJSDate(new Date(d)).setLocale('de')
+    return dt.toFormat('dd.MM.yy HH:mm')
+});
+
 new Vue({
     router,
     store,
