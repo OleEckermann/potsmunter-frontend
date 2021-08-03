@@ -45,6 +45,15 @@
           </a>
         </router-link>
         <router-link v-slot="{navigate}"
+                     :to="{name: 'import'}"
+                     custom>
+          <a class="navbar-item is-tab"
+             :class="{'is-active': $route.name === 'import'}"
+             @click="navigate">
+            Datenimport
+          </a>
+        </router-link>
+        <router-link v-slot="{navigate}"
                      :to="{name: 'userManagement'}"
                      custom>
           <a class="navbar-item is-tab"

@@ -28,7 +28,12 @@ const routes = [
     path: '/benutzerverwaltung',
     name: 'userManagement',
     component: () => import('../views/UserManagementView.vue')
-  }
+  },
+  {
+    path: '/importieren',
+    name: 'import',
+    component: () => import('../views/FileUploadView.vue')
+  },
 ]
 
 const router = new VueRouter({

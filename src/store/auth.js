@@ -56,6 +56,9 @@ export default {
             return axiosInstance.post(`/users/${state.user.id}/password`, passwordObj).then(response => {
                 commit('user', response.data)
             })
+        },
+        authenticationFailed(){
+            console.log('authentication failed')
         }
     },
     getters: {
@@ -66,7 +69,7 @@ export default {
             return state.user
         },
         readyToUse(state) {
-            return state.user && state.token && !state.user.credentials.initial;
+            return state.token && !state.user?.credentials?.initial;
         }
     }
 }
