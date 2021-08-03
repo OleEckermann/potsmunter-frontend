@@ -50,7 +50,16 @@
           <a class="navbar-item is-tab"
              :class="{'is-active': $route.name === 'import'}"
              @click="navigate">
-            Datenimport
+            Import
+          </a>
+        </router-link>
+        <router-link v-slot="{navigate}"
+                     :to="{name: 'therapists'}"
+                     custom>
+          <a class="navbar-item is-tab"
+             :class="{'is-active': $route.name === 'therapists'}"
+             @click="navigate">
+            Therapeutinnen
           </a>
         </router-link>
         <router-link v-slot="{navigate}"
@@ -59,7 +68,7 @@
           <a class="navbar-item is-tab"
              :class="{'is-active': $route.name === 'userManagement'}"
              @click="navigate">
-            Benutzerverwaltung
+            Nutzerinnen
           </a>
         </router-link>
 

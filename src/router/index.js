@@ -25,7 +25,7 @@ const routes = [
     component: () => import('../views/ReportsView.vue')
   },
   {
-    path: '/benutzerverwaltung',
+    path: '/nutzer',
     name: 'userManagement',
     component: () => import('../views/UserManagementView.vue')
   },
@@ -33,6 +33,11 @@ const routes = [
     path: '/importieren',
     name: 'import',
     component: () => import('../views/FileUploadView.vue')
+  },
+  {
+    path: '/therapeuten',
+    name: 'therapists',
+    component: () => import('../views/TherapistManagementView.vue')
   },
 ]
 

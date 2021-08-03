@@ -1,6 +1,8 @@
 <template>
-  <aside class="menu">
-    <p class="menu-label">Benutzer</p>
+  <aside class="menu is-relative">
+    <p class="menu-label">
+      <slot>Therapeutinnen</slot>
+    </p>
     <ul class="menu-list">
       <li v-for="user in users"
           :key="user.id">
@@ -15,7 +17,7 @@
         </a>
       </li>
     </ul>
-  </aside>
+    </aside>
 </template>
 
 <script>
@@ -26,3 +28,15 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+aside {
+  position: relative;
+  max-height: 50vh;
+  overflow-y: scroll;
+}
+ul {
+  position: relative;
+  max-height: 100%;
+}
+</style>

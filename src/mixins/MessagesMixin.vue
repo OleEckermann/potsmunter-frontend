@@ -19,7 +19,7 @@ export default {
           type = 'warning';
         } else if (err.response.status < 500) {
           msg = err.response.data.message;
-          type = 'warning';
+          type = err.response.data.type || 'warning';
         } else {
           msg = INTERNAL_SERVER_ERROR
         }
