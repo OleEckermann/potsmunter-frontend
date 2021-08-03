@@ -53,9 +53,9 @@
         </progress>
         <div class="is-flex is-justify-content-space-between mr-5">
           <div class="is-inline-flex has-text-success">OK: {{ uploadStatus.validEntries }}</div>
-          <div class="is-inline-flex has-text-danger">Fehler: {{ uploadStatus.errorEntries }}</div>
           <div class="is-inline-flex has-text-warning">Duplikate: {{ uploadStatus.duplicateEntries }}</div>
           <div class="is-inline-flex has-text-info">Übersprungen: {{ uploadStatus.skippedEntries }}</div>
+          <div class="is-inline-flex has-text-danger">Fehler: {{ uploadStatus.errorEntries }}</div>
         </div>
       </div>
       <div class="buttons">
