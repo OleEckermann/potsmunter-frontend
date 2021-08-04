@@ -2,16 +2,16 @@
   <div class="mb-5">
     <div class="title">Behandlungen zuweisen</div>
     <div class="content">Weisen sie Behandlungen den entsprechenden TherapeutInnen zu</div>
-    <form @submit.prevent="handlePrescriptionInput" class="block">
-      <div class="field">
-        <label class="label"
-               for="prescriptionInput">
-          Verordnung
-        </label>
-        <div class="control">
+    <form @submit.prevent="handlePrescriptionInput">
+      <div class="is-flex">
+        <div class="field is-grouped is-flex-grow-1">
+          <label class="label"
+                 for="prescriptionInput">
+            Verordnung
+          </label>
           <input v-model="prescriptionQuery"
                  v-debounce:300ms="prescriptionQueryUpdated"
-                 class="input"
+                 class="input ml-2"
                  type="text"
                  list="prescriptions"
                  id="prescriptionInput"
@@ -22,10 +22,28 @@
             <option v-for="entry in prescriptionDataList" :key="entry" :value="entry"/>
           </datalist>
         </div>
+        <div class="field is-flex-grow-4 is-flex is-align-content-center">
+          <label class="label ml-2" for="allowProcessedInput">
+            <input id="allowProcessedInput"
+                   class="control checkbox"
+                   type="checkbox"
+                   v-model="queryAlreadyProcessed"/>
+            abgerechnete einbeziehen
+          </label>
+        </div>
       </div>
     </form>
     <div class="block" v-if="prescription">
       {{ prescription.patient }} / {{ prescription.date | date }}
+      <div v-if="prescription.invoiceProcessed"
+           class="has-text-warning icon-text has-icons-left">
+        <icon icon="exclamation-triangle" class="icon mr-2"/>
+        Diese Verordnung ist bereits abgerechnet.
+        <button class="button is-small is-warning ml-3"
+                @click="overruleInvoiceProcessed = true">
+          dennoch bearbeiten
+        </button>
+      </div>
     </div>
     <div class="block" v-if="treatments.length > 0">
       <table class="table is-bordered is-fullwidth">
@@ -52,7 +70,9 @@
                    type="text"
                    :list="'therapistDataList_' + treatment.id"
                    @input="handleTherapistInput(treatment, $event)"
-                   @keydown.stop="checkShortcutPressed($event, idx)"/>
+                   @keydown.stop="checkShortcutPressed($event, idx)"
+                   :disabled="prescription.invoiceProcessed && !overruleInvoiceProcessed"
+                   :placeholder="prescription.invoiceProcessed ? 'bereits abgerechnet' : ''"/>
             <datalist :id="'therapistDataList_' + treatment.id">
               <option v-for="therapist in treatment.therapistDataList" :key="treatment.id + '_' + therapist.number"
                       :value="'[' + therapist.number + '] ' + therapist.name"/>
@@ -90,19 +110,26 @@ export default {
   data() {
     return {
       prescriptionQuery: '',
+      queryAlreadyProcessed: false,
       prescriptionDataList: [],
       prescription: null,
       therapistQuery: '',
       therapistDataList: [],
-      dirty: false
+      dirty: false,
+      overruleInvoiceProcessed: false
     }
   },
   computed: {
     treatments() {
       return this.prescription ? this.prescription.treatments : []
     },
-    showDeliveryDateWarning(){
+    showDeliveryDateWarning() {
       return this.prescription.treatments.filter(t => t.treatmentDateMissing).length > 0
+    }
+  },
+  watch: {
+    queryAlreadyProcessed() {
+      this.prescriptionQueryUpdated()
     }
   },
   methods: {
@@ -112,7 +139,8 @@ export default {
       else
         this.$api.get('/prescriptions', {
           params: {
-            q: this.prescriptionQuery
+            q: this.prescriptionQuery,
+            p: this.queryAlreadyProcessed
           }
         }).then(response => {
           this.prescriptionDataList = response.data
@@ -192,7 +220,7 @@ export default {
       } else if (e.keyCode === 40) {
         if (inputFieldIdx < this.treatments.length - 1)
           this.selectTherapistInput(inputFieldIdx + 1)
-      } else if(e.keyCode === 27){
+      } else if (e.keyCode === 27) {
         this.cancel()
       }
     },
