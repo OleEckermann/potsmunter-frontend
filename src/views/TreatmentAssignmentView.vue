@@ -31,6 +31,14 @@
                    tabindex="-1"/>
             abgerechnete einbeziehen
           </label>
+          <label class="label ml-2" for="allowProcessedInput">
+            <input id="includeIgnored"
+                   class="control checkbox"
+                   type="checkbox"
+                   v-model="includeIgnored"
+                   tabindex="-1"/>
+            ignorierte einbeziehen
+          </label>
         </div>
       </div>
     </form>
@@ -43,6 +51,15 @@
         <button class="button is-small is-warning ml-3"
                 @click="overruleInvoiceProcessed = true">
           dennoch bearbeiten
+        </button>
+      </div>
+      <div v-if="prescription.ignored"
+           class="has-text-warning icon-text has-icons-left">
+        <icon icon="exclamation-triangle" class="icon mr-2"/>
+        Diese Verordnung wird aktuell in Berichten ignoriert.
+        <button class="button is-small is-warning ml-3"
+                @click="ignorePrescription(false)">
+          Ignorieren aufheben
         </button>
       </div>
     </div>
@@ -72,8 +89,8 @@
                    :list="'therapistDataList_' + treatment.id"
                    @input="handleTherapistInput(treatment, $event)"
                    @keydown.stop="checkShortcutPressed($event, idx)"
-                   :disabled="prescription.invoiceProcessed && !overruleInvoiceProcessed"
-                   :placeholder="prescription.invoiceProcessed ? 'bereits abgerechnet' : ''"/>
+                   :disabled="(prescription.invoiceProcessed && !overruleInvoiceProcessed) || prescription.ignored"
+                   :placeholder="prescription.invoiceProcessed ? 'bereits abgerechnet' : prescription.ignored ? 'ignoriert' : ''"/>
             <datalist :id="'therapistDataList_' + treatment.id">
               <option v-for="therapist in treatment.therapistDataList" :key="treatment.id + '_' + therapist.number"
                       :value="'[' + therapist.number + '] ' + therapist.name"/>
@@ -83,6 +100,12 @@
         <tr>
           <td colspan="3" class="has-text-right">
             <div class="buttons is-pulled-right">
+              <button class="button is-warning"
+                      tabindex="-1"
+                      @click="ignorePrescription(true)"
+                      :disabled="this.dirty || this.prescription.ignored">
+                Diese Verordnung ignorieren
+              </button>
               <button class="button is-danger"
                       :disabled="!dirty"
                       tabindex="-1"
@@ -117,7 +140,8 @@ export default {
       therapistQuery: '',
       therapistDataList: [],
       dirty: false,
-      overruleInvoiceProcessed: false
+      overruleInvoiceProcessed: false,
+      includeIgnored: false
     }
   },
   computed: {
@@ -144,7 +168,8 @@ export default {
         this.$api.get('/prescriptions', {
           params: {
             q: this.prescriptionQuery,
-            p: this.queryAlreadyProcessed
+            p: this.queryAlreadyProcessed,
+            i: this.includeIgnored
           }
         }).then(response => {
           this.prescriptionDataList = response.data
@@ -170,11 +195,22 @@ export default {
       this.$api.post('/prescriptions', this.prescription)
           .then(response => {
             this.prescriptionUpdated(response.data)
-            this.showInfo('Die Änderungen wurden gespeichert')
+            this.showSuccess('Die Änderungen wurden gespeichert')
             this.$refs.prescriptionInput.focus()
             this.$refs.prescriptionInput.select()
           })
           .catch(error => this.handleError(error))
+    },
+    ignorePrescription(ignore) {
+      if (!ignore) {
+        this.prescription.ignored = false
+        this.savePrescription()
+      } else
+        this.$api.delete(`/prescriptions/${this.prescription.number}`)
+            .then(() => {
+              this.prescription.ignored = true
+              this.showInfo(`Die Verordnung ${this.prescription.number} wird in zukünftigen Suchen und Berichten ignoriert.`)
+            }).catch(error => this.handleError(error))
     },
     prescriptionUpdated(prescription) {
       prescription.treatments.forEach(t => {

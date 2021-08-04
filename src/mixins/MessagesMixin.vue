@@ -38,13 +38,18 @@ export default {
     showInfo(message) {
       this.showMessage({
         message: message,
-        type: 'info'
+        type: TYPE.INFO
+      })
+    },
+    showSuccess(message){
+      this.showMessage({
+        message,
+        type: TYPE.SUCCESS
       })
     },
     showMessage(message) {
       if (message != null) {
-        let type;
-        type = TYPE.SUCCESS;
+        let type = message.type ?? TYPE.INFO;
         if (message.type === 'danger')
           type = TYPE.ERROR
         if (message.type === 'warning')
