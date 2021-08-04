@@ -134,7 +134,10 @@ export default {
   },
   methods: {
     prescriptionQueryUpdated() {
-      if (this.prescriptionDataList.indexOf(this.prescriptionQuery) >= 0)
+      if (this.prescriptionDataList.indexOf(this.prescriptionQuery) >= 0
+          || this.prescriptionQuery.indexOf(',') > 0
+          || this.prescriptionQuery.indexOf('[') > 0
+          || this.prescriptionQuery.indexOf(']') > 0)
         this.prescriptionDataList = []
       else
         this.$api.get('/prescriptions', {
@@ -151,7 +154,9 @@ export default {
         this.loadPrescription()
     },
     loadPrescription() {
-      this.$api.get(`/prescriptions/${this.prescriptionQuery}`)
+      const prescriptionNumber = this.prescriptionQuery.slice(1, this.prescriptionQuery.indexOf(']'))
+      console.log(prescriptionNumber)
+      this.$api.get(`/prescriptions/${prescriptionNumber}`)
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.$nextTick(() => {
