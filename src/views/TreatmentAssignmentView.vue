@@ -27,7 +27,8 @@
             <input id="allowProcessedInput"
                    class="control checkbox"
                    type="checkbox"
-                   v-model="queryAlreadyProcessed"/>
+                   v-model="queryAlreadyProcessed"
+                   tabindex="-1"/>
             abgerechnete einbeziehen
           </label>
         </div>
@@ -135,9 +136,9 @@ export default {
   methods: {
     prescriptionQueryUpdated() {
       if (this.prescriptionDataList.indexOf(this.prescriptionQuery) >= 0
-          || this.prescriptionQuery.indexOf(',') > 0
-          || this.prescriptionQuery.indexOf('[') > 0
-          || this.prescriptionQuery.indexOf(']') > 0)
+          || this.prescriptionQuery.indexOf(',') >= 0
+          || this.prescriptionQuery.indexOf('[') >= 0
+          || this.prescriptionQuery.indexOf(']') >= 0)
         this.prescriptionDataList = []
       else
         this.$api.get('/prescriptions', {
