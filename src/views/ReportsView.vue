@@ -82,6 +82,7 @@
 <script>
 import {DateTime} from "luxon";
 import {mapActions} from "vuex";
+import {isAlphaNum} from "@/utils/url-utils";
 
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
@@ -166,9 +167,7 @@ export default {
     },
     therapistQueryUpdated() {
       if (this.therapistsList.indexOf(this.therapistQuery) >= 0
-          || this.therapistQuery.indexOf(',') >= 0
-          || this.therapistQuery.indexOf('[') >= 0
-          || this.therapistQuery.indexOf(']') >= 0)
+          || !isAlphaNum(this.therapistQuery))
         return
       this.$api.get('/therapists', {
         params: {

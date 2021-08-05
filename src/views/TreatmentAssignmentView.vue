@@ -129,6 +129,8 @@
 </template>
 
 <script>
+import {isAlphaNum} from "@/utils/url-utils";
+
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
   data() {
@@ -160,9 +162,7 @@ export default {
   methods: {
     prescriptionQueryUpdated() {
       if (this.prescriptionDataList.indexOf(this.prescriptionQuery) >= 0
-          || this.prescriptionQuery.indexOf(',') >= 0
-          || this.prescriptionQuery.indexOf('[') >= 0
-          || this.prescriptionQuery.indexOf(']') >= 0)
+          || !isAlphaNum(this.prescriptionQuery))
         this.prescriptionDataList = []
       else
         this.$api.get('/prescriptions', {
