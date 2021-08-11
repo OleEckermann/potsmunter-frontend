@@ -45,6 +45,10 @@ Vue.filter('dateTime', function (d) {
     return dt.toFormat('dd.MM.yy HH:mm')
 });
 
+import VTooltip from 'v-tooltip'
+import '@/assets/tooltip.css'
+Vue.use(VTooltip)
+
 new Vue({
     router,
     store,

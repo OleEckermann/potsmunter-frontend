@@ -71,7 +71,7 @@
           <th>TherapeutIn</th>
         </tr>
         <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
-          <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing">*</span></td>
+          <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing || treatment.disentangled">*</span></td>
           <td>
             <span v-for="(therapy, idx) in treatment.therapies"
                   :key="'therapy_' + idx">
@@ -98,7 +98,21 @@
           </td>
         </tr>
         <tr>
-          <td colspan="3" class="has-text-right">
+          <td>
+            <button class="button is-warning is-small"
+                    tabindex="-1"
+                    @click="disentanglePrescription"
+                    :disabled="this.prescription.ignored">
+              Vereinzeln
+            </button>
+            <div class="is-inline-flex has-text-info ml-1 mt-1 is-link"
+                 v-tooltip="'Diese Funktion hebt die Zusammenfassung von Behandlungen, die das gleiche Datum haben, auf.<br/>' +
+                           'Dadurch können diese danach einzeln verschiedenen Therapeutinnen zugewiesen werden.<br/>' +
+                            'Kann nicht rückgängig gemacht werden.'">
+              <icon icon="question-circle"/>
+            </div>
+          </td>
+          <td colspan="2" class="has-text-right">
             <div class="buttons is-pulled-right">
               <button class="button is-warning"
                       tabindex="-1"
@@ -122,7 +136,7 @@
         </tr>
       </table>
       <div v-if="showDeliveryDateWarning">
-        * Datum fehlte im Datensatz (Verordnungsdatum wird verwendet)
+        * Datum wurde manuell vereinzelt oder fehlte im Datensatz (Verordnungsdatum wird verwendet)
       </div>
     </div>
   </div>
@@ -151,7 +165,7 @@ export default {
       return this.prescription ? this.prescription.treatments : []
     },
     showDeliveryDateWarning() {
-      return this.prescription.treatments.filter(t => t.treatmentDateMissing).length > 0
+      return this.prescription.treatments.filter(t => t.treatmentDateMissing || t.disentangled).length > 0
     }
   },
   watch: {
@@ -185,10 +199,6 @@ export default {
       this.$api.get(`/prescriptions/${prescriptionNumber}`)
           .then(response => {
             this.prescriptionUpdated(response.data)
-            this.$nextTick(() => {
-              this.$refs['therapistInput_' + 0][0].focus()
-              this.$refs['therapistInput_' + 0][0].select()
-            })
           }).catch(error => this.handleError(error))
     },
     savePrescription() {
@@ -212,6 +222,14 @@ export default {
               this.showInfo(`Die Verordnung ${this.prescription.number} wird in zukünftigen Suchen und Berichten ignoriert.`)
             }).catch(error => this.handleError(error))
     },
+    disentanglePrescription(){
+      this.$api.put(`/prescriptions/${this.prescription.number}/disentangle`)
+      .then(response => {
+        this.prescriptionUpdated(response.data)
+        this.showInfo('Die Behandlungen dieser Verordnungen können nun verschiedenen Therapeutinnen zugewiesen werden')
+      })
+      .catch(error => this.handleError(error))
+    },
     prescriptionUpdated(prescription) {
       prescription.treatments.forEach(t => {
         if (t.therapist) {
@@ -220,8 +238,12 @@ export default {
           t.therapistQuery = ''
         t.therapistDataList = []
       })
-      this.prescription = prescription
       this.dirty = false
+      this.prescription = prescription
+      this.$nextTick(() => {
+        this.$refs['therapistInput_' + 0][0].focus()
+        this.$refs['therapistInput_' + 0][0].select()
+      })
     },
     therapistQueryUpdated(input, event) {
       let treatment = this.prescription.treatments.find(t => t.id === ~~event.target.id)
@@ -281,3 +303,9 @@ export default {
   }
 }
 </script>
+
+<style>
+.info-tt-wrapper {
+  display: inline-flex;
+}
+</style>
