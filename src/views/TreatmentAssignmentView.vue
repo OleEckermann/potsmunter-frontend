@@ -2,48 +2,35 @@
   <div class="mb-5">
     <div class="title">Behandlungen zuweisen</div>
     <div class="content">Weisen sie Behandlungen den entsprechenden TherapeutInnen zu</div>
-    <form @submit.prevent="handlePrescriptionInput">
-      <div class="is-flex">
-        <div class="field is-grouped is-flex-grow-1">
-          <label class="label"
-                 for="prescriptionInput">
-            Verordnung
-          </label>
-          <input v-model="prescriptionQuery"
-                 v-debounce:300ms="prescriptionQueryUpdated"
-                 class="input ml-2"
-                 type="text"
-                 list="prescriptions"
-                 id="prescriptionInput"
-                 ref="prescriptionInput"
-                 @input="handlePrescriptionInput"
-                 autofocus/>
-          <datalist id="prescriptions">
-            <option v-for="entry in prescriptionDataList" :key="entry" :value="entry"/>
-          </datalist>
-        </div>
-        <div class="field is-flex-grow-4 is-flex is-align-content-center">
-          <label class="label ml-2" for="allowProcessedInput">
-            <input id="allowProcessedInput"
-                   class="control checkbox"
-                   type="checkbox"
-                   v-model="queryAlreadyProcessed"
-                   tabindex="-1"/>
-            abgerechnete einbeziehen
-          </label>
-          <label class="label ml-2" for="allowProcessedInput">
-            <input id="includeIgnored"
-                   class="control checkbox"
-                   type="checkbox"
-                   v-model="includeIgnored"
-                   tabindex="-1"/>
-            ignorierte einbeziehen
-          </label>
-        </div>
+    <div class="box is-flex">
+      <prescription-finder
+          class="is-flex-grow-1"
+          :include-ignored="includeIgnored"
+          :include-processed="queryAlreadyProcessed"
+          :focus="focusPrescriptionQuery"
+          @input="prescriptionQuery = $event"
+          @focusout="focusPrescriptionQuery = false"/>
+      <div class="field is-flex">
+        <label class="label m-auto pl-2" for="allowProcessedInput">
+          <input id="allowProcessedInput"
+                 class="control checkbox"
+                 type="checkbox"
+                 v-model="queryAlreadyProcessed"
+                 tabindex="-1"/>
+          abgerechnete einbeziehen
+        </label>
+        <label class="label m-auto pl-2" for="allowProcessedInput">
+          <input id="includeIgnored"
+                 class="control checkbox"
+                 type="checkbox"
+                 v-model="includeIgnored"
+                 tabindex="-1"/>
+          ignorierte einbeziehen
+        </label>
       </div>
-    </form>
+    </div>
     <div class="block" v-if="prescription">
-      {{ prescription.patient }} / {{ prescription.date | date }}
+      <div class="heading">{{ prescription.patient }} / {{ prescription.date | date }}</div>
       <div v-if="prescription.invoiceProcessed"
            class="has-text-warning icon-text has-icons-left">
         <icon icon="exclamation-triangle" class="icon mr-2"/>
@@ -63,20 +50,63 @@
         </button>
       </div>
     </div>
-    <div class="block" v-if="treatments.length > 0">
-      <table class="table is-bordered is-fullwidth">
+    <table class="table is-fullwidth"
+           v-if="treatments.length > 0">
+      <thead>
         <tr>
           <th>Datum</th>
           <th>Behandlungen</th>
           <th>TherapeutIn</th>
         </tr>
+      </thead>
+      <tfoot>
+      <tr>
+        <td>
+          <button class="button is-warning is-small"
+                  tabindex="-1"
+                  @click="disentanglePrescription"
+                  :disabled="this.prescription.ignored">
+            Vereinzeln
+          </button>
+          <div class="is-inline-flex has-text-info ml-1 mt-1 is-link"
+               v-tooltip="'Diese Funktion hebt die Zusammenfassung von Behandlungen, die das gleiche Datum haben, auf.<br/>' +
+                           'Dadurch können diese danach einzeln verschiedenen Therapeutinnen zugewiesen werden.<br/>' +
+                            'Kann nicht rückgängig gemacht werden.'">
+            <icon icon="question-circle"/>
+          </div>
+        </td>
+        <td colspan="2" class="has-text-right">
+          <div class="buttons is-pulled-right">
+            <button class="button is-warning"
+                    tabindex="-1"
+                    @click="ignorePrescription(true)"
+                    :disabled="this.dirty || this.prescription.ignored">
+              Diese Verordnung ignorieren
+            </button>
+            <button class="button is-danger"
+                    :disabled="!dirty"
+                    tabindex="-1"
+                    @click="cancel">
+              Abbrechen
+            </button>
+            <button class="button is-primary"
+                    :disabled="!dirty"
+                    @click="savePrescription">
+              Speichern
+            </button>
+          </div>
+        </td>
+      </tr>
+      </tfoot>
+      <tbody>
         <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
-          <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing || treatment.disentangled">*</span></td>
+          <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing || treatment.disentangled">*</span>
+          </td>
           <td>
-            <span v-for="(therapy, idx) in treatment.therapies"
-                  :key="'therapy_' + idx">
-              {{ therapy.position }} {{ therapy.name }}<br/>
-            </span>
+              <span v-for="(therapy, idx) in treatment.therapies"
+                    :key="'therapy_' + idx">
+                {{ therapy.position }} {{ therapy.name }}<br/>
+              </span>
           </td>
           <td>
             <input :ref="'therapistInput_' + idx"
@@ -97,108 +127,61 @@
             </datalist>
           </td>
         </tr>
-        <tr>
-          <td>
-            <button class="button is-warning is-small"
-                    tabindex="-1"
-                    @click="disentanglePrescription"
-                    :disabled="this.prescription.ignored">
-              Vereinzeln
-            </button>
-            <div class="is-inline-flex has-text-info ml-1 mt-1 is-link"
-                 v-tooltip="'Diese Funktion hebt die Zusammenfassung von Behandlungen, die das gleiche Datum haben, auf.<br/>' +
-                           'Dadurch können diese danach einzeln verschiedenen Therapeutinnen zugewiesen werden.<br/>' +
-                            'Kann nicht rückgängig gemacht werden.'">
-              <icon icon="question-circle"/>
-            </div>
-          </td>
-          <td colspan="2" class="has-text-right">
-            <div class="buttons is-pulled-right">
-              <button class="button is-warning"
-                      tabindex="-1"
-                      @click="ignorePrescription(true)"
-                      :disabled="this.dirty || this.prescription.ignored">
-                Diese Verordnung ignorieren
-              </button>
-              <button class="button is-danger"
-                      :disabled="!dirty"
-                      tabindex="-1"
-                      @click="cancel">
-                Abbrechen
-              </button>
-              <button class="button is-primary"
-                      :disabled="!dirty"
-                      @click="savePrescription">
-                Speichern
-              </button>
-            </div>
-          </td>
-        </tr>
-      </table>
-      <div v-if="showDeliveryDateWarning">
-        * Datum wurde manuell vereinzelt oder fehlte im Datensatz (Verordnungsdatum wird verwendet)
-      </div>
+      </tbody>
+    </table>
+    <div v-if="showDeliveryDateWarning">
+      * Datum wurde manuell vereinzelt oder fehlte im Datensatz (Verordnungsdatum wird verwendet)
     </div>
   </div>
 </template>
 
 <script>
-import {isAlphaNum} from "@/utils/url-utils";
+import PrescriptionFinder from "@/components/PrescriptionFinder";
 
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
+  components: {PrescriptionFinder},
   data() {
     return {
       prescriptionQuery: '',
+      focusPrescriptionQuery: true,
       queryAlreadyProcessed: false,
-      prescriptionDataList: [],
+      includeIgnored: false,
       prescription: null,
       therapistQuery: '',
       therapistDataList: [],
       dirty: false,
       overruleInvoiceProcessed: false,
-      includeIgnored: false
+      workList: []
     }
   },
   computed: {
+    processingWorkList() {
+      return this.workList.length > 0
+    },
     treatments() {
       return this.prescription ? this.prescription.treatments : []
     },
     showDeliveryDateWarning() {
-      return this.prescription.treatments.filter(t => t.treatmentDateMissing || t.disentangled).length > 0
+      return this.prescription?.treatments.filter(t => t.treatmentDateMissing || t.disentangled).length > 0
     }
   },
   watch: {
-    queryAlreadyProcessed() {
-      this.prescriptionQueryUpdated()
+    prescriptionQuery() {
+      this.loadPrescription()
     }
   },
   methods: {
-    prescriptionQueryUpdated() {
-      if (this.prescriptionDataList.indexOf(this.prescriptionQuery) >= 0
-          || !isAlphaNum(this.prescriptionQuery))
-        this.prescriptionDataList = []
-      else
-        this.$api.get('/prescriptions', {
-          params: {
-            q: this.prescriptionQuery,
-            p: this.queryAlreadyProcessed,
-            i: this.includeIgnored
-          }
-        }).then(response => {
-          this.prescriptionDataList = response.data
-        }).catch(error => this.handleError(error))
-    },
-    handlePrescriptionInput() {
-      if (this.prescriptionDataList.indexOf(this.prescriptionQuery) >= 0)
-        this.loadPrescription()
-    },
     loadPrescription() {
       const prescriptionNumber = this.prescriptionQuery.slice(1, this.prescriptionQuery.indexOf(']'))
       console.log(prescriptionNumber)
       this.$api.get(`/prescriptions/${prescriptionNumber}`)
           .then(response => {
             this.prescriptionUpdated(response.data)
+            this.$nextTick(() => {
+              this.$refs['therapistInput_' + 0][0].focus()
+              this.$refs['therapistInput_' + 0][0].select()
+            })
           }).catch(error => this.handleError(error))
     },
     savePrescription() {
@@ -206,8 +189,9 @@ export default {
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.showSuccess('Die Änderungen wurden gespeichert')
-            this.$refs.prescriptionInput.focus()
-            this.$refs.prescriptionInput.select()
+            this.$nextTick(() => {
+              this.focusPrescriptionQuery = true
+            })
           })
           .catch(error => this.handleError(error))
     },
@@ -222,13 +206,17 @@ export default {
               this.showInfo(`Die Verordnung ${this.prescription.number} wird in zukünftigen Suchen und Berichten ignoriert.`)
             }).catch(error => this.handleError(error))
     },
-    disentanglePrescription(){
+    disentanglePrescription() {
       this.$api.put(`/prescriptions/${this.prescription.number}/disentangle`)
-      .then(response => {
-        this.prescriptionUpdated(response.data)
-        this.showInfo('Die Behandlungen dieser Verordnungen können nun verschiedenen Therapeutinnen zugewiesen werden')
-      })
-      .catch(error => this.handleError(error))
+          .then(response => {
+            this.prescriptionUpdated(response.data)
+            this.showInfo('Die Behandlungen dieser Verordnungen können nun verschiedenen Therapeutinnen zugewiesen werden')
+            this.$nextTick(() => {
+              this.$refs['therapistInput_' + 0][0].focus()
+              this.$refs['therapistInput_' + 0][0].select()
+            })
+          })
+          .catch(error => this.handleError(error))
     },
     prescriptionUpdated(prescription) {
       prescription.treatments.forEach(t => {
@@ -240,10 +228,6 @@ export default {
       })
       this.dirty = false
       this.prescription = prescription
-      this.$nextTick(() => {
-        this.$refs['therapistInput_' + 0][0].focus()
-        this.$refs['therapistInput_' + 0][0].select()
-      })
     },
     therapistQueryUpdated(input, event) {
       let treatment = this.prescription.treatments.find(t => t.id === ~~event.target.id)

@@ -7,35 +7,34 @@
       {{ date.toFormat('MMM') }}&nbsp;{{ date.toFormat('yy') }}
       <span class="icon button" @click="navigate(1)"><icon icon="chevron-right"></icon></span>
     </div>
-    <div class="block box">
-      <div v-if="!noUnassignedPrescriptions"
+    <div class="block box" v-if="reportInfo">
+      <div v-if="reportInfo.incompleteInvoiceCount > 0"
            class="icon-text">
         <icon class="icon has-text-danger" size="2x" icon="times-circle"/>
         <span class="is-bold has-text-danger is-clickable">
-          {{ unassignedPrescriptionCount }}
+          {{ reportInfo.incompleteInvoiceCount }}
         </span>
-        &nbsp;von {{ prescriptionCount }} Verordnung<span v-if="unassignedPrescriptionCount > 1">en</span>&nbsp;in
-        diesem Abrechnungszeitraum
-        {{ unassignedPrescriptionCount === 1 ? 'ist' : 'sind' }} noch keiner Therapeutin zugewiesen.
+        &nbsp;von {{ reportInfo.invoiceCount }} Rechnung<span v-if="reportInfo.invoiceCount > 1">en</span>&nbsp;
+        {{ reportInfo.incompleteInvoiceCount === 1 ? 'hat' : 'haben' }} noch nicht ignorierte Verordnungen mit nicht zugeordneten Behandlungen.
       </div>
       <div v-else
            class="icon-text">
         <icon class="icon has-text-success" size="2x" icon="check-circle"/>
         Alle&nbsp;
-        <span class="is-bold has-text-success">{{ assignedPrescriptionCount }}</span>
+        <span class="is-bold has-text-success">{{ reportInfo.invoiceCount }}</span>
         &nbsp;Behandlungen der Verordnungen in diesem Abrechnungszeitraum sind Therapeutinnen zugewiesen.
       </div>
       <div class="buttons mt-5">
-        <div class="button is-info" v-if="unassignedPrescriptionCount > 0">Bearbeiten</div>
+        <div class="button is-info" v-if="reportInfo.incompleteInvoiceCount > 0">Bearbeiten</div>
         <div class="button is-warning"
-             v-if="unassignedPrescriptionCount > 0"
-             @click="downloadReport"
+             v-if="reportInfo.incompleteInvoiceCount > 0"
+             @click="downloadReport(null)"
              target="_parent">
           Ignorieren und alle Berichte erstellen
         </div>
         <div class="button is-primary"
-             v-if="unassignedPrescriptionCount === 0"
-             @click="downloadReport">
+             v-if="reportInfo.incompleteInvoiceCount === 0"
+             @click="downloadReport(null)">
           alle Berichte erstellen
         </div>
       </div>
@@ -92,7 +91,7 @@ export default {
       reportInfo: {},
       therapistQuery: '',
       selectedTherapist: undefined,
-      therapists: []
+      therapists: [],
     }
   },
   computed: {
@@ -104,18 +103,6 @@ export default {
     },
     noLogsAvailable() {
       return this.reportInfo?.logs?.length === 0
-    },
-    noUnassignedPrescriptions() {
-      return this.unassignedPrescriptionCount === 0
-    },
-    unassignedPrescriptionCount() {
-      return this.reportInfo?.unassignedPrescriptions?.length || 0
-    },
-    assignedPrescriptionCount() {
-      return this.reportInfo?.assignedPrescriptionCount || 0
-    },
-    prescriptionCount() {
-      return this.unassignedPrescriptionCount + this.assignedPrescriptionCount
     },
     therapistsList() {
       return this.therapists.map(t => therapistStr(t))
