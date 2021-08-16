@@ -2,35 +2,67 @@
   <div class="mb-5">
     <div class="title">Behandlungen zuweisen</div>
     <div class="content">Weisen sie Behandlungen den entsprechenden TherapeutInnen zu</div>
-    <div class="box is-flex">
-      <prescription-finder
-          class="is-flex-grow-1"
-          :include-ignored="includeIgnored"
-          :include-processed="queryAlreadyProcessed"
-          :focus="focusPrescriptionQuery"
-          @input="prescriptionQuery = $event"
-          @focusout="focusPrescriptionQuery = false"/>
-      <div class="field is-flex">
-        <label class="label m-auto pl-2" for="allowProcessedInput">
-          <input id="allowProcessedInput"
-                 class="control checkbox"
-                 type="checkbox"
-                 v-model="queryAlreadyProcessed"
-                 tabindex="-1"/>
-          abgerechnete einbeziehen
-        </label>
-        <label class="label m-auto pl-2" for="allowProcessedInput">
-          <input id="includeIgnored"
-                 class="control checkbox"
-                 type="checkbox"
-                 v-model="includeIgnored"
-                 tabindex="-1"/>
-          ignorierte einbeziehen
-        </label>
+    <div class="box is-flex is-flex-direction-row">
+      <div class="is-flex-grow-2">
+        <div class="tabs is-small mb-2">
+          <ul>
+            <li :class="{'is-active': !searchByDate}" @click="searchByDate = !searchByDate"><a>nach Nummer/Patient</a>
+            </li>
+            <li :class="{'is-active': searchByDate}" @click="searchByDate = !searchByDate"><a>nach Monat</a></li>
+          </ul>
+        </div>
+        <prescription-finder
+            v-show="!searchByDate"
+            class="mt-0"
+            :include-ignored="includeIgnored"
+            :include-processed="queryAlreadyProcessed"
+            :focus="focusPrescriptionQuery"
+            @input="prescriptionQuery = $event"
+            @focusout="focusPrescriptionQuery = false"/>
+        <div v-if="searchByDate" class="is-flex">
+          <month-selector @input="date = $event"/>
+        </div>
+      </div>
+      <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
+        <div class="field">
+          <label class="label m-auto pl-2" for="allowProcessedInput">
+            <input id="allowProcessedInput"
+                   class="control checkbox"
+                   type="checkbox"
+                   v-model="queryAlreadyProcessed"
+                   tabindex="-1"/>
+            abgerechnete einbeziehen
+          </label>
+        </div>
+        <div class="field">
+          <label class="label m-auto pl-2" for="allowProcessedInput">
+            <input id="includeIgnored"
+                   class="control checkbox"
+                   type="checkbox"
+                   v-model="includeIgnored"
+                   tabindex="-1"/>
+            ignorierte einbeziehen
+          </label>
+        </div>
       </div>
     </div>
     <div class="block" v-if="prescription">
-      <div class="heading">{{ prescription.patient }} / {{ prescription.date | date }}</div>
+      <div class="is-flex is-fullwidth">
+        <div class="heading is-flex is-flex-grow-1">{{ prescription.patient }} / {{ prescription.date | date }}</div>
+        <div v-if="workList.length > 0 && prescription"
+             class="is-flex is-flex-wrap-nowrap ml-2">
+          <div class="is-text is-bold is-large" style="font-weight: bolder;">{{ prescription.number }}</div>
+          <div class="ml-3">
+            <a @click="navWorkList(-1)">
+              <icon icon="chevron-left" class="mr-2 is-link"/>
+            </a>
+            {{ workListIndex + 1 }} von {{ workList.length }}
+            <a @click="navWorkList(1)">
+              <icon icon="chevron-right" class="ml-2 is-link"/>
+            </a>
+          </div>
+        </div>
+      </div>
       <div v-if="prescription.invoiceProcessed"
            class="has-text-warning icon-text has-icons-left">
         <icon icon="exclamation-triangle" class="icon mr-2"/>
@@ -53,11 +85,11 @@
     <table class="table is-fullwidth"
            v-if="treatments.length > 0">
       <thead>
-        <tr>
-          <th>Datum</th>
-          <th>Behandlungen</th>
-          <th>TherapeutIn</th>
-        </tr>
+      <tr>
+        <th>Datum</th>
+        <th>Behandlungen</th>
+        <th>TherapeutIn</th>
+      </tr>
       </thead>
       <tfoot>
       <tr>
@@ -99,34 +131,34 @@
       </tr>
       </tfoot>
       <tbody>
-        <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
-          <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing || treatment.disentangled">*</span>
-          </td>
-          <td>
+      <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
+        <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing || treatment.disentangled">*</span>
+        </td>
+        <td>
               <span v-for="(therapy, idx) in treatment.therapies"
                     :key="'therapy_' + idx">
                 {{ therapy.position }} {{ therapy.name }}<br/>
               </span>
-          </td>
-          <td>
-            <input :ref="'therapistInput_' + idx"
-                   :id="treatment.id"
-                   v-model="treatment.therapistQuery"
-                   v-debounce:300ms.cancelonempty="therapistQueryUpdated"
-                   debounce-events="input"
-                   class="input"
-                   type="text"
-                   :list="'therapistDataList_' + treatment.id"
-                   @input="handleTherapistInput(treatment, $event)"
-                   @keydown.stop="checkShortcutPressed($event, idx)"
-                   :disabled="(prescription.invoiceProcessed && !overruleInvoiceProcessed) || prescription.ignored"
-                   :placeholder="prescription.invoiceProcessed ? 'bereits abgerechnet' : prescription.ignored ? 'ignoriert' : ''"/>
-            <datalist :id="'therapistDataList_' + treatment.id">
-              <option v-for="therapist in treatment.therapistDataList" :key="treatment.id + '_' + therapist.number"
-                      :value="'[' + therapist.number + '] ' + therapist.name"/>
-            </datalist>
-          </td>
-        </tr>
+        </td>
+        <td>
+          <input :ref="'therapistInput_' + idx"
+                 :id="treatment.id"
+                 v-model="treatment.therapistQuery"
+                 v-debounce:300ms.cancelonempty="therapistQueryUpdated"
+                 debounce-events="input"
+                 class="input"
+                 type="text"
+                 :list="'therapistDataList_' + treatment.id"
+                 @input="handleTherapistInput(treatment, $event)"
+                 @keydown.stop="checkShortcutPressed($event, idx)"
+                 :disabled="(prescription.invoiceProcessed && !overruleInvoiceProcessed) || prescription.ignored"
+                 :placeholder="prescription.invoiceProcessed ? 'bereits abgerechnet' : prescription.ignored ? 'ignoriert' : ''"/>
+          <datalist :id="'therapistDataList_' + treatment.id">
+            <option v-for="therapist in treatment.therapistDataList" :key="treatment.id + '_' + therapist.number"
+                    :value="'[' + therapist.number + '] ' + therapist.name"/>
+          </datalist>
+        </td>
+      </tr>
       </tbody>
     </table>
     <div v-if="showDeliveryDateWarning">
@@ -137,12 +169,16 @@
 
 <script>
 import PrescriptionFinder from "@/components/PrescriptionFinder";
+import MonthSelector from "@/components/MonthSelector";
+import {mapActions} from "vuex";
 
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
-  components: {PrescriptionFinder},
+  components: {PrescriptionFinder, MonthSelector},
   data() {
     return {
+      searchByDate: false,
+      date: null,
       prescriptionQuery: '',
       focusPrescriptionQuery: true,
       queryAlreadyProcessed: false,
@@ -152,13 +188,11 @@ export default {
       therapistDataList: [],
       dirty: false,
       overruleInvoiceProcessed: false,
-      workList: []
+      workList: [],
+      workListIndex: -1
     }
   },
   computed: {
-    processingWorkList() {
-      return this.workList.length > 0
-    },
     treatments() {
       return this.prescription ? this.prescription.treatments : []
     },
@@ -167,14 +201,55 @@ export default {
     }
   },
   watch: {
+    searchByDate(){
+      this.workList = []
+      this.workListIndex = -1
+      this.prescriptionQuery = ''
+    },
     prescriptionQuery() {
-      this.loadPrescription()
+      this.prescriptionQueryUpdated()
+    },
+    includeIgnored() {
+      this.searchByDate ? this.dateUpdated() : this.prescriptionQueryUpdated()
+    },
+    queryAlreadyProcessed() {
+      this.searchByDate ? this.dateUpdated() : this.prescriptionQueryUpdated()
+    },
+    date() {
+      this.dateUpdated()
+    },
+    workListIndex() {
+      this.prescriptionQuery = this.workList[this.workListIndex]
     }
   },
   methods: {
+    ...mapActions(['startLoading', 'stopLoading']),
+    dateUpdated() {
+      this.startLoading('lade Verordnungsliste')
+      this.$api.get(`/prescriptions`, {
+        params: {
+          y: this.date.year,
+          m: this.date.month,
+          p: this.includeProcessed,
+          i: this.includeIgnored
+        }
+      }).then(response => {
+        console.info(response.data)
+        this.workList = response.data
+        if (this.workList.length > 0)
+          this.workListIndex = 0
+      }).catch(error => this.handleError(error))
+          .finally(() => this.stopLoading())
+    },
+    prescriptionQueryUpdated() {
+      this.loadPrescription()
+    },
+    navWorkList(step) {
+      if (this.workListIndex + step < this.workList.length && this.workListIndex + step >= 0)
+        this.workListIndex += step
+    },
     loadPrescription() {
       const prescriptionNumber = this.prescriptionQuery.slice(1, this.prescriptionQuery.indexOf(']'))
-      console.log(prescriptionNumber)
       this.$api.get(`/prescriptions/${prescriptionNumber}`)
           .then(response => {
             this.prescriptionUpdated(response.data)
@@ -190,7 +265,10 @@ export default {
             this.prescriptionUpdated(response.data)
             this.showSuccess('Die Änderungen wurden gespeichert')
             this.$nextTick(() => {
-              this.focusPrescriptionQuery = true
+              if (!this.searchByDate)
+                this.focusPrescriptionQuery = true
+              else
+                this.navWorkList(1)
             })
           })
           .catch(error => this.handleError(error))
@@ -198,13 +276,13 @@ export default {
     ignorePrescription(ignore) {
       if (!ignore) {
         this.prescription.ignored = false
-        this.savePrescription()
       } else
         this.$api.delete(`/prescriptions/${this.prescription.number}`)
             .then(() => {
               this.prescription.ignored = true
               this.showInfo(`Die Verordnung ${this.prescription.number} wird in zukünftigen Suchen und Berichten ignoriert.`)
             }).catch(error => this.handleError(error))
+      this.savePrescription()
     },
     disentanglePrescription() {
       this.$api.put(`/prescriptions/${this.prescription.number}/disentangle`)
