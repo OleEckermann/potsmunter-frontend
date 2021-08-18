@@ -6,9 +6,9 @@
       <div class="is-flex-grow-2">
         <div class="tabs is-small mb-2">
           <ul>
-            <li :class="{'is-active': !searchByDate}" @click="searchByDate = false"><a>nach Nummer/Patient</a>
+            <li :class="{'is-active': !searchByDate}" @click="searchByDate = false"><a>nach Verordnung/Patient</a>
             </li>
-            <li :class="{'is-active': searchByDate}" @click="searchByDate = true"><a>nach Verrechnungszeitraum</a></li>
+            <li :class="{'is-active': searchByDate}" @click="searchByDate = true"><a>nach Rechnungsdatum</a></li>
           </ul>
         </div>
         <prescription-finder
@@ -20,7 +20,7 @@
             :focus="focusPrescriptionQuery"
             @focusout="focusPrescriptionQuery = false"/>
         <div v-if="searchByDate" class="is-flex">
-          <month-selector v-model="date"/>
+          Rechnung im <month-selector v-model="date" class="ml-2"/>
         </div>
       </div>
       <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
@@ -48,10 +48,19 @@
     </div>
     <div class="block" v-if="prescription">
       <div class="is-flex is-fullwidth">
-        <div class="heading is-flex is-flex-grow-1">{{ prescription.patient }} / {{ prescription.date | date }}</div>
-        <div v-if="workList.length > 0 && prescription"
+        <div class="is-block is-flex-grow-1">
+          <div class="heading">
+            {{ prescription.patient }} / {{prescription.number}} - {{ prescription.date | date }}
+          </div>
+          <div v-if="prescription.invoiceNumber" class="heading is-text is-italic">
+            {{ prescription.invoiceNumber }} - {{ prescription.invoiceDate | date }}
+          </div>
+        </div>
+        <div v-if="searchByDate && prescription"
              class="is-flex is-flex-wrap-nowrap ml-2">
-          <div class="is-text is-bold is-large" style="font-weight: bolder;">{{ prescription.number }}</div>
+          <div class="is-text is-bold is-large" style="font-weight: bolder;">
+            {{ prescription.number }}
+          </div>
           <div class="ml-3">
             <a @click="navWorkList(-1)">
               <icon icon="chevron-left" class="mr-2 is-link"/>
