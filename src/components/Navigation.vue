@@ -9,32 +9,15 @@
 
     <div id="navbarBasicExample" class="navbar-menu is-active">
       <div class="navbar-start">
-        <div class="navbar-item has-dropdown is-hoverable">
-          <router-link v-slot="{navigate}"
-                       :to="{name: 'treatmentAssignment'}"
-                       custom>
-            <a class="navbar-item is-tab"
-               :class="{'is-active': $route.name === 'treatmentAssignment'}"
-               @click="navigate">
-              Verordnungen
-            </a>
-          </router-link>
-
-          <div class="navbar-dropdown">
-            <router-link v-slot="{navigate}"
-                         :to="{name: 'treatmentAssignment'}"
-                         custom>
-              <a class="navbar-item"
-                 :class="{'is-active': $route.name === 'treatmentAssignment'}"
-                 @click="navigate">
-                Behandlungen zuweisen
-              </a>
-            </router-link>
-            <a class="navbar-item">
-              Unbearbeitete Verordnungen anzeigen
-            </a>
-          </div>
-        </div>
+        <router-link v-slot="{navigate}"
+                     :to="{name: 'treatmentAssignment'}"
+                     custom>
+          <a class="navbar-item is-tab"
+             :class="{'is-active': $route.name === 'treatmentAssignment'}"
+             @click="navigate">
+            Behandlungen zuweisen
+          </a>
+        </router-link>
         <router-link v-slot="{navigate}"
                      :to="{name: 'reports'}"
                      custom>
