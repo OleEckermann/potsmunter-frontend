@@ -6,9 +6,9 @@
       <div class="is-flex-grow-2">
         <div class="tabs is-small mb-2">
           <ul>
-            <li :class="{'is-active': !searchByDate}" @click="searchByDate = !searchByDate"><a>nach Nummer/Patient</a>
+            <li :class="{'is-active': !searchByDate}" @click="searchByDate = false"><a>nach Nummer/Patient</a>
             </li>
-            <li :class="{'is-active': searchByDate}" @click="searchByDate = !searchByDate"><a>nach Monat</a></li>
+            <li :class="{'is-active': searchByDate}" @click="searchByDate = true"><a>nach Verrechnungszeitraum</a></li>
           </ul>
         </div>
         <prescription-finder
