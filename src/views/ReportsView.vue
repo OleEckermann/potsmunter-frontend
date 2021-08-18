@@ -15,7 +15,8 @@
           {{ reportInfo.incompleteInvoiceCount }}
         </span>
         &nbsp;von {{ reportInfo.invoiceCount }} Rechnung<span v-if="reportInfo.invoiceCount > 1">en</span>&nbsp;
-        {{ reportInfo.incompleteInvoiceCount === 1 ? 'hat' : 'haben' }} noch nicht ignorierte Verordnungen mit nicht zugeordneten Behandlungen.
+        {{ reportInfo.incompleteInvoiceCount === 1 ? 'hat' : 'haben' }} noch nicht ignorierte Verordnungen mit nicht
+        zugeordneten Behandlungen.
       </div>
       <div v-else
            class="icon-text">
@@ -25,7 +26,15 @@
         &nbsp;Behandlungen der Verordnungen in diesem Abrechnungszeitraum sind Therapeutinnen zugewiesen.
       </div>
       <div class="buttons mt-5">
-        <div class="button is-info" v-if="reportInfo.incompleteInvoiceCount > 0">Bearbeiten</div>
+        <router-link v-if="reportInfo.incompleteInvoiceCount > 0"
+                     v-slot="{navigate}"
+                     :to="{name: 'treatmentAssignment', query: {m: date.month, y:date.year}}"
+                     custom>
+          <div class="button is-info"
+               @click="navigate">
+            Bearbeiten
+          </div>
+        </router-link>
         <div class="button is-warning"
              v-if="reportInfo.incompleteInvoiceCount > 0"
              @click="downloadReport(null)"

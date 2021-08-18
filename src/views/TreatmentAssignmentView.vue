@@ -12,15 +12,15 @@
           </ul>
         </div>
         <prescription-finder
+            v-model="prescriptionQuery"
             v-show="!searchByDate"
             class="mt-0"
             :include-ignored="includeIgnored"
             :include-processed="queryAlreadyProcessed"
             :focus="focusPrescriptionQuery"
-            @input="prescriptionQuery = $event"
             @focusout="focusPrescriptionQuery = false"/>
         <div v-if="searchByDate" class="is-flex">
-          <month-selector @input="date = $event"/>
+          <month-selector v-model="date"/>
         </div>
       </div>
       <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
@@ -81,6 +81,9 @@
           Ignorieren aufheben
         </button>
       </div>
+    </div>
+    <div v-else>
+      Es wurden keine Verordnungen für diese Suchkriterien gefunden
     </div>
     <table class="table is-fullwidth"
            v-if="treatments.length > 0">
@@ -171,6 +174,7 @@
 import PrescriptionFinder from "@/components/PrescriptionFinder";
 import MonthSelector from "@/components/MonthSelector";
 import {mapActions} from "vuex";
+import {DateTime} from "luxon";
 
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
@@ -201,10 +205,23 @@ export default {
     }
   },
   watch: {
-    searchByDate(){
-      this.workList = []
-      this.workListIndex = -1
-      this.prescriptionQuery = ''
+    $route: {
+      immediate: true,
+      handler(to) {
+        if (to.query.m) {
+          this.searchByDate = true
+          this.$nextTick(() => {
+            this.date = DateTime.local(+to.query.y, +to.query.m)
+          })
+        }
+      }
+    },
+    searchByDate(turnedOn) {
+      if (turnedOn) {
+        this.dateUpdated()
+      } else {
+        this.prescriptionQueryUpdated()
+      }
     },
     prescriptionQuery() {
       this.prescriptionQueryUpdated()
@@ -219,7 +236,7 @@ export default {
       this.dateUpdated()
     },
     workListIndex() {
-      this.prescriptionQuery = this.workList[this.workListIndex]
+      this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
     }
   },
   methods: {
@@ -238,11 +255,17 @@ export default {
         this.workList = response.data
         if (this.workList.length > 0)
           this.workListIndex = 0
+        else {
+          this.workListIndex = -1
+        }
       }).catch(error => this.handleError(error))
           .finally(() => this.stopLoading())
     },
     prescriptionQueryUpdated() {
-      this.loadPrescription()
+      if (this.prescriptionQuery)
+        this.loadPrescription()
+      else
+        this.prescription = null
     },
     navWorkList(step) {
       if (this.workListIndex + step < this.workList.length && this.workListIndex + step >= 0)
@@ -361,8 +384,8 @@ export default {
     },
     cancel() {
       this.loadPrescription()
-    }
-  }
+    },
+  },
 }
 </script>
 

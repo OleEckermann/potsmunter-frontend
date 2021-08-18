@@ -31,7 +31,11 @@ export default {
   props: {
     includeIgnored: Boolean,
     includeProcessed: Boolean,
-    focus: Boolean
+    focus: Boolean,
+    value: {
+      type: String,
+      default: ''
+    }
   },
   data() {
     return {
@@ -40,6 +44,13 @@ export default {
     }
   },
   watch: {
+    value: {
+      immediate: true,
+      handler(newVal){
+        this.query = newVal
+        this.prescriptionQueryUpdated()
+      }
+    },
     focus(newVal){
       if(newVal) {
         this.$refs['prescriptionInput'].focus()
