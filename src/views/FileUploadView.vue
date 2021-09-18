@@ -119,7 +119,7 @@ export default {
         try {
           let text = evt.target.result;
           let lines = text.split('\n');
-          this.uploadStatus.totalEntries = lines.length
+          this.uploadStatus.totalEntries = lines.length - 2
           const header = lines[0]
           let prescriptions = new Map()
           for (let row = 1; row < lines.length; row++) {
