@@ -1,7 +1,7 @@
 <template>
   <div class="mb-5">
     <div class="title">Datenimport</div>
-    <div class="content">Importieren Sie TerraTools CSV-Exporte.</div>
+    <div class="content">Importieren Sie Thera-Tools CSV-Exporte.</div>
     <div class="block box">
       <div class="field">
         <div class="file has-name is-fullwidth">
