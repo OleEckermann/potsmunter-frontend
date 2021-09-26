@@ -20,7 +20,8 @@
             :focus="focusPrescriptionQuery"
             @focusout="focusPrescriptionQuery = false"/>
         <div v-if="searchByDate" class="is-flex">
-          Rechnung im <month-selector v-model="date" class="ml-2"/>
+          Rechnung im
+          <month-selector v-model="date" class="ml-2"/>
         </div>
       </div>
       <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
@@ -50,7 +51,7 @@
       <div class="is-flex is-fullwidth">
         <div class="is-block is-flex-grow-1">
           <div class="heading">
-            {{ prescription.patient }} / {{prescription.number}} - {{ prescription.date | date }}
+            {{ prescription.patient }} / {{ prescription.number }} - {{ prescription.date | date }}
           </div>
           <div v-if="prescription.invoiceNumber" class="heading is-text is-italic">
             {{ prescription.invoiceNumber }} - {{ prescription.invoiceDate | date }}
@@ -227,7 +228,7 @@ export default {
     },
     searchByDate(turnedOn) {
       if (turnedOn) {
-        this.dateUpdated()
+        this.date = DateTime.now()
       } else {
         this.prescriptionQueryUpdated()
       }
