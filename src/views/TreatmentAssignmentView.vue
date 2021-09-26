@@ -1,5 +1,6 @@
 <template>
-  <div class="mb-5">
+  <div class="mb-5"
+       @keydown.stop="checkShortcutPressed($event)">
     <div class="title">Behandlungen zuweisen</div>
     <div class="content">Weisen sie Behandlungen den entsprechenden TherapeutInnen zu</div>
     <div class="box is-flex is-flex-direction-row">
@@ -115,8 +116,9 @@
           </button>
           <div class="is-inline-flex has-text-info ml-1 mt-1 is-link"
                v-tooltip="'Diese Funktion hebt die Zusammenfassung von Behandlungen, die das gleiche Datum haben, auf.<br/>' +
-                           'Dadurch können diese danach einzeln verschiedenen Therapeutinnen zugewiesen werden.<br/>' +
-                            'Kann nicht rückgängig gemacht werden.'">
+                          'Dadurch können diese danach einzeln verschiedenen Therapeutinnen zugewiesen werden.<br/>' +
+                          'Kann nicht rückgängig gemacht werden.<br/>' +
+                          '<i>Tastaturkürzel: STRG+E</i>'">
             <icon icon="question-circle"/>
           </div>
         </td>
@@ -369,17 +371,20 @@ export default {
       }
     },
     checkShortcutPressed(e, inputFieldIdx) {
-      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
+      if (e.key === "e" && (e.ctrlKey || e.metaKey) && this.prescription) {
+        e.preventDefault()
+        this.disentanglePrescription()
+      } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
         this.savePrescription()
-      } else if (e.keyCode === 38) {
+      } else if (e.keyCode === 38) { // up
         if (inputFieldIdx > 0) {
           this.selectTherapistInput(inputFieldIdx - 1)
         }
-      } else if (e.keyCode === 40) {
+      } else if (e.keyCode === 40) { // down
         if (inputFieldIdx < this.treatments.length - 1)
           this.selectTherapistInput(inputFieldIdx + 1)
-      } else if (e.keyCode === 27) {
+      } else if (e.keyCode === 27) { // Escape
         this.cancel()
       }
     },
