@@ -35,7 +35,7 @@
         <button
             class="button is-primary"
             @click="upload"
-            :disabled="uploadStatus.processing">
+            :disabled="uploadStatus.processing || selectedFile.name === ''">
           <span class="icon-text">Verarbeiten</span>
           <icon class="icon fa-spin" icon="spinner" v-if="uploadStatus.processing"/>
         </button>
@@ -43,7 +43,7 @@
     </div>
     <div class="block box"
          v-if="uploadStatus.show">
-      <div class="heading">Verarbeitungsstatus</div>
+      <div class="heading">Verarbeitungsstatus Datei {{uploadStatus.filename}}</div>
       <div>Einträge insgesamt: {{ uploadStatus.totalEntries }}</div>
       <div>verarbeitet: {{ uploadStatus.entriesProcessed }}</div>
       <div class="box mt-2">
@@ -93,6 +93,7 @@ export default {
   methods: {
     resetUploadStatus() {
       this.uploadStatus = {
+        filename: null,
         show: false,
         processing: false,
         currentEntry: '',
@@ -114,6 +115,7 @@ export default {
       reader.readAsText(this.selectedFile, "Cp1252");
       reader.onload = async evt => {
         this.resetUploadStatus()
+        this.uploadStatus.filename = this.selectedFile.name
         this.uploadStatus.show = true
         this.uploadStatus.processing = true
         try {
@@ -133,7 +135,7 @@ export default {
             }
           }
           for (const [prescriptionNumber, csv] of prescriptions) {
-            if(!this.uploadStatus.processing)
+            if (!this.uploadStatus.processing)
               break
             this.uploadStatus.currentEntry = '...' + csv.slice(46, 46 + Math.min(csv.length - 46, 80)) + '...'
             await this.$api.post('/import', {
@@ -159,25 +161,29 @@ export default {
             })
           }
         } finally {
-          this.uploadStatus.processing = false
+          this.stopProcessing()
+          this.clearFileInput()
         }
       }
       reader.onerror = evt => {
         console.error(evt);
-        this.uploadStatus.processing = false
+        this.stopProcessing()
       }
     },
     stopProcessing() {
       this.uploadStatus.processing = false
     },
-    finishProcessing(){
+    finishProcessing() {
+      this.clearFileInput();
+      this.uploadStatus.show = false
+    },
+    clearFileInput() {
       this.$refs['fileInput'].value = null
       this.selectedFile = {name: ''}
-      this.uploadStatus.show = false
     }
   },
-  beforeRouteLeave(to, from, next){
-    if(this.uploadStatus.processing){
+  beforeRouteLeave(to, from, next) {
+    if (this.uploadStatus.processing) {
       this.showMessage({
         message: 'Beenden oder unterbrechen Sie zunächst den Datenimport, bevor Sie diese Seite verlassen.',
         type: 'warning'
