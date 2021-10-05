@@ -59,7 +59,7 @@
         </div>
       </div>
       <div class="buttons">
-        <div class="button is-primary" v-if="!uploadStatus.processing" @click="uploadStatus.show = false">OK</div>
+        <div class="button is-primary" v-if="!uploadStatus.processing" @click="finishProcessing">OK</div>
         <div class="button is-warning" v-if="uploadStatus.processing" @click="stopProcessing">Abbrechen</div>
       </div>
     </div>
@@ -169,6 +169,11 @@ export default {
     },
     stopProcessing() {
       this.uploadStatus.processing = false
+    },
+    finishProcessing(){
+      this.$refs['fileInput'].value = null
+      this.selectedFile = {name: ''}
+      this.uploadStatus.show = false
     }
   },
   beforeRouteLeave(to, from, next){
