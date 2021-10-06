@@ -112,7 +112,7 @@ export default {
     async upload() {
       // Credit: https://stackoverflow.com/a/754398/52160
       let reader = new FileReader();
-      reader.readAsText(this.selectedFile, "Cp1252");
+      reader.readAsText(this.selectedFile);
       reader.onload = async evt => {
         this.resetUploadStatus()
         this.uploadStatus.filename = this.selectedFile.name
@@ -140,7 +140,7 @@ export default {
             this.uploadStatus.currentEntry = '...' + csv.slice(46, 46 + Math.min(csv.length - 46, 80)) + '...'
             await this.$api.post('/import', {
               prescriptionNumber: prescriptionNumber,
-              treatmentsCSV: header + csv
+              treatmentsCSV: header + '\n' + csv
             }).then(response => {
               const results = response.data
               this.uploadStatus.entriesProcessed += results.length
