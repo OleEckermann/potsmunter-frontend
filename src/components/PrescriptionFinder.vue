@@ -29,8 +29,14 @@ import {isAlphaNum} from "@/utils/url-utils";
 
 export default {
   props: {
-    includeIgnored: Boolean,
-    includeProcessed: Boolean,
+    includeIgnored: {
+      type: Boolean,
+      default: false
+    },
+    includeProcessed: {
+      type: Boolean,
+      default: false
+    },
     focus: Boolean,
     value: {
       type: String,

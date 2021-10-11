@@ -262,11 +262,10 @@ export default {
         params: {
           y: this.date.year,
           m: this.date.month,
-          p: this.includeProcessed,
+          p: this.queryAlreadyProcessed,
           i: this.includeIgnored
         }
       }).then(response => {
-        console.info(response.data)
         this.workList = response.data
         if (this.workList.length > 0)
           this.workListIndex = 0
@@ -316,7 +315,6 @@ export default {
       }
     },
     savePrescription() {
-      console.log('saving prescription')
       this.$api.post('/prescriptions', this.prescription)
           .then(response => {
             this.prescriptionUpdated(response.data)
