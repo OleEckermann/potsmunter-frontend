@@ -117,9 +117,9 @@
           </button>
           <div class="is-inline-flex has-text-info ml-1 mt-1 is-link"
                v-tooltip="'Diese Funktion hebt die Zusammenfassung von Behandlungen, die das gleiche Datum haben, auf.<br/>' +
-                          'Dadurch können diese danach einzeln verschiedenen Therapeutinnen zugewiesen werden.<br/>' +
-                          'Kann nicht rückgängig gemacht werden.<br/>' +
-                          '<i>Tastaturkürzel: STRG+E</i>'">
+                            'Dadurch können diese danach einzeln verschiedenen Therapeutinnen zugewiesen werden.<br/>' +
+                            'Kann nicht rückgängig gemacht werden.<br/>' +
+                            '<i>Tastaturkürzel: STRG+E</i>'">
             <icon icon="question-circle"/>
           </div>
         </td>
@@ -148,14 +148,15 @@
       </tfoot>
       <tbody>
       <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
-        <td>{{treatment.number}}</td>
+        <td>{{ treatment.number }}</td>
         <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing || treatment.disentangled">*</span>
         </td>
         <td>
-              <span v-for="(therapy, idx) in treatment.therapies"
-                    :key="'therapy_' + idx">
-                {{ therapy.position }} {{ therapy.name }}<br/>
-              </span>
+                <span v-for="(therapy, idx) in treatment.therapies"
+                      :key="'therapy_' + idx"
+                      :class="treatmentBlockClass(therapy.position)">
+                  {{ therapy.position }} {{ therapy.name }}<br/>
+                </span>
         </td>
         <td>
           <input :ref="'therapistInput_' + idx"
@@ -419,13 +420,32 @@ export default {
     },
     cancel() {
       this.loadPrescription()
+    },
+    treatmentBlockClass(position){
+      const block1 = [21302,21303,21310,21312,21501,21517,21530,21531,21532,21533,21534,21703,21705,21708,21710,21712,21714,21720,21732,21733,21801]
+      const block2 = [21301,29701,29901,29902,29906,29907,29909,29910,29911,29933,29934,29935,21906]
+      if(block1.indexOf(position) >= 0)
+        return 'treatment-block-1'
+      if(block2.indexOf(position) >= 0)
+        return 'treatment-block-2'
+      return ''
     }
   },
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
+@import "~@/assets/custom.scss";
+
 .info-tt-wrapper {
   display: inline-flex;
+}
+
+.treatment-block-1 {
+  color: $beige-light;
+}
+
+.treatment-block-2 {
+  color: $cyan;
 }
 </style>
