@@ -4,7 +4,7 @@
     <div class="content">Erstellen und verschicken Sie Zahlungsberichte</div>
     <div class="block">
       <span class="icon button" @click="navigate(-1)"><icon icon="chevron-left"></icon></span>
-      {{ date.toFormat('MMM') }}&nbsp;{{ date.toFormat('yy') }}
+      {{ date.toFormat('MMMM') }}&nbsp;{{ date.toFormat('yy') }}
       <span class="icon button" @click="navigate(1)"><icon icon="chevron-right"></icon></span>
     </div>
     <div class="block box" v-if="reportInfo">
