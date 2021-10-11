@@ -138,7 +138,7 @@
             </button>
             <button class="button is-primary"
                     :disabled="!dirty"
-                    @click="savePrescription">
+                    @click="confirmSave">
               Speichern
             </button>
           </div>
@@ -179,6 +179,7 @@
     <div v-if="showDeliveryDateWarning">
       * Datum wurde manuell vereinzelt oder fehlte im Datensatz (Verordnungsdatum wird verwendet)
     </div>
+    <vue-confirm-dialog></vue-confirm-dialog>
   </div>
 </template>
 
@@ -294,7 +295,26 @@ export default {
             })
           }).catch(error => this.handleError(error))
     },
+    confirmSave() {
+      let unassignedCount = this.prescription.treatments.filter(t => !t.therapist).length
+      if (unassignedCount === 1) {
+        this.$confirm({
+          message: `Sie haben eine Behandlung nicht zugewiesen. Sind Sie sicher, dass dies so bleiben soll?`,
+          button: {
+            no: 'Nein',
+            yes: 'Ja'
+          },
+          callback: confirm => {
+            if (confirm)
+              return this.savePrescription()
+          }
+        })
+      } else {
+        this.savePrescription()
+      }
+    },
     savePrescription() {
+      console.log('saving prescription')
       this.$api.post('/prescriptions', this.prescription)
           .then(response => {
             this.prescriptionUpdated(response.data)
@@ -376,7 +396,7 @@ export default {
         this.disentanglePrescription()
       } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
-        this.savePrescription()
+        this.confirmSave()
       } else if (e.keyCode === 38) { // up
         if (inputFieldIdx > 0) {
           this.selectTherapistInput(inputFieldIdx - 1)
@@ -399,7 +419,7 @@ export default {
     },
     cancel() {
       this.loadPrescription()
-    },
+    }
   },
 }
 </script>

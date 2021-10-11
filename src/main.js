@@ -49,6 +49,10 @@ import VTooltip from 'v-tooltip'
 import '@/assets/tooltip.css'
 Vue.use(VTooltip)
 
+import VueConfirmDialog from 'vue-confirm-dialog'
+Vue.use(VueConfirmDialog)
+Vue.component('vue-confirm-dialog', VueConfirmDialog.default)
+
 new Vue({
     router,
     store,
