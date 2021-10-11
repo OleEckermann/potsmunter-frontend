@@ -100,6 +100,7 @@
            v-if="treatments.length > 0">
       <thead>
       <tr>
+        <th>Nr.</th>
         <th>Datum</th>
         <th>Behandlungen</th>
         <th>TherapeutIn</th>
@@ -107,7 +108,7 @@
       </thead>
       <tfoot>
       <tr>
-        <td>
+        <td colspan="2">
           <button class="button is-warning is-small"
                   tabindex="-1"
                   @click="disentanglePrescription"
@@ -147,6 +148,7 @@
       </tfoot>
       <tbody>
       <tr v-for="(treatment, idx) in treatments" :key="treatment.id">
+        <td>{{treatment.number}}</td>
         <td>{{ treatment.date | date }}<span v-if="treatment.treatmentDateMissing || treatment.disentangled">*</span>
         </td>
         <td>
