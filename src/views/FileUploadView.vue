@@ -112,7 +112,7 @@ export default {
     async upload() {
       // Credit: https://stackoverflow.com/a/754398/52160
       let reader = new FileReader();
-      reader.readAsText(this.selectedFile);
+      reader.readAsText(this.selectedFile, 'ISO-8859-1');
       reader.onload = async evt => {
         this.resetUploadStatus()
         this.uploadStatus.filename = this.selectedFile.name
