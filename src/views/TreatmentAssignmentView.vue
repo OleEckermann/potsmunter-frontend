@@ -168,6 +168,7 @@
                  type="text"
                  :list="'therapistDataList_' + treatment.id"
                  @input="handleTherapistInput(treatment, $event)"
+                 @change="checkEmptyTherapistInput(treatment, $event)"
                  @keydown.stop="checkShortcutPressed($event, idx)"
                  :disabled="(prescription.invoiceProcessed && !overruleInvoiceProcessed) || prescription.ignored"
                  :placeholder="prescription.invoiceProcessed ? 'bereits abgerechnet' : prescription.ignored ? 'ignoriert' : ''"/>
@@ -389,6 +390,13 @@ export default {
         if (idx + 1 < this.treatments.length) {
           this.selectTherapistInput(idx + 1)
         }
+      } else {
+        treatment.therapist = undefined
+      }
+    },
+    checkEmptyTherapistInput(treatment, event){
+      if(!event.target.value){
+        this.handleTherapistInput(treatment)
       }
     },
     checkShortcutPressed(e, inputFieldIdx) {
