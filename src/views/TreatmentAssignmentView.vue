@@ -46,6 +46,16 @@
             ignorierte einbeziehen
           </label>
         </div>
+        <div class="field" v-if="searchByDate">
+          <label class="label m-auto pl-2" for="allowProcessedInput">
+            <input id="onlyUnassigned"
+                   class="control checkbox"
+                   type="checkbox"
+                   v-model="onlyUnassigned"
+                   tabindex="-1"/>
+            nur nicht zugewiesene
+          </label>
+        </div>
       </div>
     </div>
     <div class="block" v-if="prescription">
@@ -204,6 +214,7 @@ export default {
       focusPrescriptionQuery: true,
       queryAlreadyProcessed: false,
       includeIgnored: false,
+      onlyUnassigned: false,
       prescription: null,
       therapistQuery: '',
       therapistDataList: [],
@@ -228,6 +239,7 @@ export default {
         if (to.query.m) {
           this.searchByDate = true
           this.$nextTick(() => {
+            this.onlyUnassigned = true
             this.date = DateTime.local(+to.query.y, +to.query.m)
           })
         }
@@ -249,6 +261,10 @@ export default {
     queryAlreadyProcessed() {
       this.searchByDate ? this.dateUpdated() : this.prescriptionQueryUpdated()
     },
+    onlyUnassigned(){
+      if(this.searchByDate)
+        this.dateUpdated()
+    },
     date() {
       this.dateUpdated()
     },
@@ -265,7 +281,8 @@ export default {
           y: this.date.year,
           m: this.date.month,
           p: this.queryAlreadyProcessed,
-          i: this.includeIgnored
+          i: this.includeIgnored,
+          u: this.onlyUnassigned
         }
       }).then(response => {
         this.workList = response.data
