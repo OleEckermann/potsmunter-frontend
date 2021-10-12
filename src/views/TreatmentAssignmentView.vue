@@ -340,14 +340,17 @@ export default {
             this.showSuccess('Die Änderungen wurden gespeichert')
             if(msg)
               this.showInfo(msg)
-            this.$nextTick(() => {
-              if (!this.searchByDate)
-                this.focusPrescriptionQuery = true
-              else
-                this.navWorkList(1)
-            })
+            this.goToNext()
           })
           .catch(error => this.handleError(error))
+    },
+    goToNext(){
+      this.$nextTick(() => {
+        if (!this.searchByDate)
+          this.focusPrescriptionQuery = true
+        else
+          this.navWorkList(1)
+      })
     },
     ignorePrescription(ignore) {
       if (!ignore) {
@@ -358,6 +361,7 @@ export default {
             .then(() => {
               this.prescription.ignored = true
               this.showInfo(`Die Verordnung ${this.prescription.number} wird in zukünftigen Suchen und Berichten ignoriert.`)
+              this.goToNext()
             }).catch(error => this.handleError(error))
     },
     disentanglePrescription() {
