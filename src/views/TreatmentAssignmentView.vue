@@ -261,8 +261,8 @@ export default {
     queryAlreadyProcessed() {
       this.searchByDate ? this.dateUpdated() : this.prescriptionQueryUpdated()
     },
-    onlyUnassigned(){
-      if(this.searchByDate)
+    onlyUnassigned() {
+      if (this.searchByDate)
         this.dateUpdated()
     },
     date() {
@@ -350,13 +350,13 @@ export default {
     ignorePrescription(ignore) {
       if (!ignore) {
         this.prescription.ignored = false
+        this.savePrescription()
       } else
         this.$api.delete(`/prescriptions/${this.prescription.number}`)
             .then(() => {
               this.prescription.ignored = true
               this.showInfo(`Die Verordnung ${this.prescription.number} wird in zukünftigen Suchen und Berichten ignoriert.`)
             }).catch(error => this.handleError(error))
-      this.savePrescription()
     },
     disentanglePrescription() {
       this.$api.put(`/prescriptions/${this.prescription.number}/disentangle`)
@@ -411,8 +411,8 @@ export default {
         treatment.therapist = undefined
       }
     },
-    checkEmptyTherapistInput(treatment, event){
-      if(!event.target.value){
+    checkEmptyTherapistInput(treatment, event) {
+      if (!event.target.value) {
         this.handleTherapistInput(treatment)
       }
     },
@@ -446,12 +446,12 @@ export default {
     cancel() {
       this.loadPrescription()
     },
-    treatmentBlockClass(position){
-      const block1 = [21302,21303,21310,21312,21501,21517,21530,21531,21532,21533,21534,21703,21705,21708,21710,21712,21714,21720,21732,21733,21801]
-      const block2 = [21301,29701,29901,29902,29906,29907,29909,29910,29911,29933,29934,29935,21906]
-      if(block1.indexOf(position) >= 0)
+    treatmentBlockClass(position) {
+      const block1 = [21302, 21303, 21310, 21312, 21501, 21517, 21530, 21531, 21532, 21533, 21534, 21703, 21705, 21708, 21710, 21712, 21714, 21720, 21732, 21733, 21801]
+      const block2 = [21301, 29701, 29901, 29902, 29906, 29907, 29909, 29910, 29911, 29933, 29934, 29935, 21906]
+      if (block1.indexOf(position) >= 0)
         return 'treatment-block-1'
-      if(block2.indexOf(position) >= 0)
+      if (block2.indexOf(position) >= 0)
         return 'treatment-block-2'
       return ''
     }
