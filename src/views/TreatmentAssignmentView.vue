@@ -333,11 +333,13 @@ export default {
         this.savePrescription()
       }
     },
-    savePrescription() {
+    savePrescription(msg) {
       this.$api.post('/prescriptions', this.prescription)
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.showSuccess('Die Änderungen wurden gespeichert')
+            if(msg)
+              this.showInfo(msg)
             this.$nextTick(() => {
               if (!this.searchByDate)
                 this.focusPrescriptionQuery = true
@@ -350,7 +352,7 @@ export default {
     ignorePrescription(ignore) {
       if (!ignore) {
         this.prescription.ignored = false
-        this.savePrescription()
+        this.savePrescription('Die Verordnung wird nun nicht mehr ignoriert.')
       } else
         this.$api.delete(`/prescriptions/${this.prescription.number}`)
             .then(() => {
