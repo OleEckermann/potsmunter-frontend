@@ -381,7 +381,7 @@ export default {
       }
     },
     savePrescription(msg) {
-      this.$api.put('/prescriptions', this.prescription)
+      this.$api.put(`/prescriptions/${this.prescription.number}`, this.prescription)
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.showSuccess('Die Änderungen wurden gespeichert')
