@@ -27,7 +27,7 @@
           <month-selector v-model="date" class="ml-2"/>
         </div>
         <div v-if="searchByImport" class="is-flex">
-          <imported-file-selector v-model="selectedImportedFile"/>
+          <imported-file-selector @input="selectedImportedFile = $event"/>
         </div>
       </div>
       <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
@@ -73,7 +73,7 @@
             {{ prescription.invoiceNumber }} - {{ prescription.invoiceDate | date }}
           </div>
         </div>
-        <div v-if="searchByDate && prescription"
+        <div v-if="(searchByDate || searchByImport) && prescription"
              class="is-flex is-flex-wrap-nowrap ml-2">
           <div class="is-text is-bold is-large" style="font-weight: bolder;">
             {{ prescription.number }}
@@ -264,6 +264,10 @@ export default {
     prescriptionQuery() {
       this.prescriptionQueryUpdated()
     },
+    selectedImportedFile(newVal){
+      if(newVal)
+        this.selectedImportedFileUpdated()
+    },
     includeIgnored() {
       this.searchByDate ? this.dateUpdated() : this.prescriptionQueryUpdated()
     },
@@ -319,6 +323,25 @@ export default {
         this.loadPrescription()
       else
         this.prescription = null
+    },
+    selectedImportedFileUpdated() {
+      this.startLoading('lade Verordnungsliste')
+      this.$api.get(`/prescriptions`, {
+        params: {
+          p: this.queryAlreadyProcessed,
+          i: this.includeIgnored,
+          u: this.onlyUnassigned,
+          f: this.selectedImportedFile.id
+        }
+      }).then(response => {
+        this.workList = response.data
+        if (this.workList.length > 0)
+          this.workListIndex = 0
+        else {
+          this.workListIndex = -1
+        }
+      }).catch(error => this.handleError(error))
+          .finally(() => this.stopLoading())
     },
     navWorkList(step) {
       if (this.workListIndex + step < this.workList.length && this.workListIndex + step >= 0)
