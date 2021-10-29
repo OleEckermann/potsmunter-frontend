@@ -138,9 +138,10 @@ export default {
             if (!this.uploadStatus.processing)
               break
             this.uploadStatus.currentEntry = '...' + csv.slice(46, 46 + Math.min(csv.length - 46, 80)) + '...'
-            await this.$api.post('/import', {
+            await this.$api.post('/imports', {
               prescriptionNumber: prescriptionNumber,
-              treatmentsCSV: header + '\n' + csv
+              treatmentsCSV: header + '\n' + csv,
+              importFilename: this.selectedFile.name
             }).then(response => {
               const results = response.data
               this.uploadStatus.entriesProcessed += results.length
