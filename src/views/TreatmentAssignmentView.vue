@@ -11,6 +11,7 @@
               Verordnung/Patient</a>
             </li>
             <li :class="{'is-active': searchByDate}" @click="searchBy('date')"><a>nach Rechnungsdatum</a></li>
+            <li :class="{'is-active': searchByImport}" @click="searchBy('import')"><a>nach Import</a></li>
           </ul>
         </div>
         <prescription-finder
@@ -24,6 +25,9 @@
         <div v-if="searchByDate" class="is-flex">
           Rechnung im
           <month-selector v-model="date" class="ml-2"/>
+        </div>
+        <div v-if="searchByImport" class="is-flex">
+          <imported-file-selector v-model="selectedImportedFile"/>
         </div>
       </div>
       <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
@@ -203,10 +207,11 @@ import PrescriptionFinder from "@/components/PrescriptionFinder";
 import MonthSelector from "@/components/MonthSelector";
 import {mapActions} from "vuex";
 import {DateTime} from "luxon";
+import ImportedFileSelector from "@/components/ImportedFileSelector";
 
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
-  components: {PrescriptionFinder, MonthSelector},
+  components: {ImportedFileSelector, PrescriptionFinder, MonthSelector},
   data() {
     return {
       searchByPrescription: true,
@@ -214,6 +219,7 @@ export default {
       searchByImport: false,
       date: null,
       prescriptionQuery: '',
+      selectedImportedFile: {id: -1},
       focusPrescriptionQuery: true,
       queryAlreadyProcessed: false,
       includeIgnored: false,
