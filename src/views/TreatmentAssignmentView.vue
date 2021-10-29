@@ -71,6 +71,7 @@
           </div>
           <div v-if="prescription.invoiceNumber" class="heading is-text is-italic">
             {{ prescription.invoiceNumber }} - {{ prescription.invoiceDate | date }}
+            <icon class="has-text-danger" icon="trash-alt" @click="deleteInvoice(prescription.invoiceNumber)"/>
           </div>
         </div>
         <div v-if="(searchByDate || searchByImport) && prescription"
@@ -264,8 +265,8 @@ export default {
     prescriptionQuery() {
       this.prescriptionQueryUpdated()
     },
-    selectedImportedFile(newVal){
-      if(newVal)
+    selectedImportedFile(newVal) {
+      if (newVal)
         this.selectedImportedFileUpdated()
     },
     includeIgnored() {
@@ -280,6 +281,9 @@ export default {
     },
     date() {
       this.dateUpdated()
+    },
+    workList(){
+      this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
     },
     workListIndex() {
       this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
@@ -377,7 +381,7 @@ export default {
       }
     },
     savePrescription(msg) {
-      this.$api.post('/prescriptions', this.prescription)
+      this.$api.put('/prescriptions', this.prescription)
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.showSuccess('Die Änderungen wurden gespeichert')
@@ -386,6 +390,23 @@ export default {
             this.goToNext()
           })
           .catch(error => this.handleError(error))
+    },
+    deleteInvoice(invoiceNumber) {
+      this.$confirm({
+        message: `Möchten Sie die Rechnung ` + invoiceNumber + ` mit all Ihren Verordnungen und Behandlungen komplett löschen?`,
+        button: {
+          no: 'Nein',
+          yes: 'Ja'
+        },
+        callback: confirm => {
+          if (confirm)
+            this.$api.delete(`/invoices/${invoiceNumber}`)
+                .then(() => {
+                  this.showInfo('Die Rechnung ' + invoiceNumber + ' wurde gelöscht')
+                  this.reset()
+                }).catch(error => this.handleError(error))
+        }
+      })
     },
     goToNext() {
       this.$nextTick(() => {
@@ -494,6 +515,14 @@ export default {
     },
     cancel() {
       this.loadPrescription()
+    },
+    reset() {
+      if(this.searchByPrescription)
+        this.prescriptionQuery = ''
+      if(this.searchByImport)
+        this.selectedImportedFileUpdated()
+      if(this.searchByDate)
+        this.dateUpdated()
     },
     treatmentBlockClass(position) {
       const block1 = [21302, 21303, 21310, 21312, 21501, 21517, 21530, 21531, 21532, 21533, 21534, 21703, 21705, 21708, 21710, 21712, 21714, 21720, 21732, 21733, 21801]
