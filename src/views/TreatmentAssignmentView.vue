@@ -7,14 +7,16 @@
       <div class="is-flex-grow-2">
         <div class="tabs is-small mb-2">
           <ul>
-            <li :class="{'is-active': !searchByDate}" @click="searchByDate = false"><a>nach Verordnung/Patient</a>
+            <li :class="{'is-active': searchByPrescription}" @click="searchBy('prescription')"><a>nach
+              Verordnung/Patient</a>
             </li>
-            <li :class="{'is-active': searchByDate}" @click="searchByDate = true"><a>nach Rechnungsdatum</a></li>
+            <li :class="{'is-active': searchByDate}" @click="searchBy('date')"><a>nach Rechnungsdatum</a></li>
+            <li :class="{'is-active': searchByImport}" @click="searchBy('import')"><a>nach Import</a></li>
           </ul>
         </div>
         <prescription-finder
             v-model="prescriptionQuery"
-            v-show="!searchByDate"
+            v-show="searchByPrescription"
             class="mt-0"
             :include-ignored="includeIgnored"
             :include-processed="queryAlreadyProcessed"
@@ -23,6 +25,9 @@
         <div v-if="searchByDate" class="is-flex">
           Rechnung im
           <month-selector v-model="date" class="ml-2"/>
+        </div>
+        <div v-if="searchByImport" class="is-flex">
+          <imported-file-selector v-model="selectedImportedFile"/>
         </div>
       </div>
       <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
@@ -202,15 +207,19 @@ import PrescriptionFinder from "@/components/PrescriptionFinder";
 import MonthSelector from "@/components/MonthSelector";
 import {mapActions} from "vuex";
 import {DateTime} from "luxon";
+import ImportedFileSelector from "@/components/ImportedFileSelector";
 
 const therapistStr = (t) => '[' + t.number + '] ' + t.firstName + ' ' + t.lastName;
 export default {
-  components: {PrescriptionFinder, MonthSelector},
+  components: {ImportedFileSelector, PrescriptionFinder, MonthSelector},
   data() {
     return {
+      searchByPrescription: true,
       searchByDate: false,
+      searchByImport: false,
       date: null,
       prescriptionQuery: '',
+      selectedImportedFile: {id: -1},
       focusPrescriptionQuery: true,
       queryAlreadyProcessed: false,
       includeIgnored: false,
@@ -237,7 +246,7 @@ export default {
       immediate: true,
       handler(to) {
         if (to.query.m) {
-          this.searchByDate = true
+          this.searchBy('date')
           this.$nextTick(() => {
             this.onlyUnassigned = true
             this.date = DateTime.local(+to.query.y, +to.query.m)
@@ -274,6 +283,17 @@ export default {
   },
   methods: {
     ...mapActions(['startLoading', 'stopLoading']),
+    searchBy(searchType) {
+      this.searchByDate = false
+      this.searchByPrescription = false
+      this.searchByImport = false
+      if (searchType === 'date')
+        this.searchByDate = true
+      else if (searchType === 'import')
+        this.searchByImport = true
+      else if (searchType === 'prescription')
+        this.searchByPrescription = true
+    },
     dateUpdated() {
       this.startLoading('lade Verordnungsliste')
       this.$api.get(`/prescriptions`, {
@@ -338,15 +358,15 @@ export default {
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.showSuccess('Die Änderungen wurden gespeichert')
-            if(msg)
+            if (msg)
               this.showInfo(msg)
             this.goToNext()
           })
           .catch(error => this.handleError(error))
     },
-    goToNext(){
+    goToNext() {
       this.$nextTick(() => {
-        if (!this.searchByDate)
+        if (this.searchByPrescription)
           this.focusPrescriptionQuery = true
         else
           this.navWorkList(1)
