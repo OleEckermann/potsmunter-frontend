@@ -1,11 +1,13 @@
 <template>
   <div class="select">
-    <select @change="$emit('input', $event)">
+    <select v-model="selected">
       <option v-for="f in importedFiles"
               :key="'file_'+ f.id"
-              :class="{'is-active': f.id === value.id}"
+              :class="{'is-active': f.id === selected.id}"
               :value="f">
-        f.name
+        <div>
+          {{ f.date | date }} &quot;{{ f.name }}&quot; - {{ f.importedBy }}
+        </div>
       </option>
     </select>
   </div>
@@ -13,12 +15,15 @@
 
 <script>
 export default {
-  props: {
-    value: Object
-  },
   data() {
     return {
-      importedFiles: []
+      importedFiles: [],
+      selected: {}
+    }
+  },
+  watch: {
+    selected() {
+      this.$emit('input', this.selected)
     }
   },
   methods: {
