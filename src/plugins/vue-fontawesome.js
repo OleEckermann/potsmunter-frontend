@@ -11,7 +11,8 @@ import {
     faSpinner,
     faUpload,
     faExclamationTriangle,
-    faQuestionCircle
+    faQuestionCircle,
+    faTrashAlt
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faUser)
@@ -24,4 +25,5 @@ library.add(faSpinner)
 library.add(faUpload)
 library.add(faExclamationTriangle)
 library.add(faQuestionCircle)
+library.add(faTrashAlt)
 Vue.component('icon', FontAwesomeIcon)
