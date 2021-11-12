@@ -284,6 +284,9 @@ export default {
     workList() {
       this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
     },
+    prescriptionQueryEntry(){
+      this.loadPrescription()
+    },
     workListIndex() {
       this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
     }
