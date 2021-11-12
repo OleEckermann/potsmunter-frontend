@@ -21,7 +21,8 @@
             :include-ignored="includeIgnored"
             :include-processed="queryAlreadyProcessed"
             :focus="focusPrescriptionQuery"
-            @focusout="focusPrescriptionQuery = false"/>
+            @focusout="focusPrescriptionQuery = false"
+            @entryChanged="prescriptionQueryUpdated($event)"/>
         <div v-if="searchByDate" class="is-flex">
           Rechnung im
           <month-selector v-model="date" class="ml-2"/>
@@ -220,6 +221,7 @@ export default {
       searchByImport: false,
       date: null,
       prescriptionQuery: '',
+      prescriptionQueryEntry: null,
       selectedImportedFile: {id: -1},
       focusPrescriptionQuery: true,
       queryAlreadyProcessed: false,
@@ -262,9 +264,6 @@ export default {
         this.prescriptionQueryUpdated()
       }
     },
-    prescriptionQuery() {
-      this.prescriptionQueryUpdated()
-    },
     selectedImportedFile(newVal) {
       if (newVal)
         this.selectedImportedFileUpdated()
@@ -282,7 +281,7 @@ export default {
     date() {
       this.dateUpdated()
     },
-    workList(){
+    workList() {
       this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
     },
     workListIndex() {
@@ -322,9 +321,9 @@ export default {
       }).catch(error => this.handleError(error))
           .finally(() => this.stopLoading())
     },
-    prescriptionQueryUpdated() {
-      if (this.prescriptionQuery)
-        this.loadPrescription()
+    prescriptionQueryUpdated(entry) {
+      if (entry)
+        this.prescriptionQueryEntry = entry
       else
         this.prescription = null
     },
@@ -351,16 +350,21 @@ export default {
       if (this.workListIndex + step < this.workList.length && this.workListIndex + step >= 0)
         this.workListIndex += step
     },
-    loadPrescription() {
-      const prescriptionNumber = this.prescriptionQuery.slice(1, this.prescriptionQuery.indexOf(']'))
-      this.$api.get(`/prescriptions/${prescriptionNumber}`)
-          .then(response => {
-            this.prescriptionUpdated(response.data)
-            this.$nextTick(() => {
-              this.$refs['therapistInput_' + 0][0].focus()
-              this.$refs['therapistInput_' + 0][0].select()
-            })
-          }).catch(error => this.handleError(error))
+    loadPrescription(prescriptionId) {
+      let id = prescriptionId
+      if (!prescriptionId) {
+        // ESC gedrückt oder cancel button
+        id = this.prescriptionQueryEntry?.id
+      }
+      if (id)
+        this.$api.get(`/prescriptions/${id}`)
+            .then(response => {
+              this.prescriptionUpdated(response.data)
+              this.$nextTick(() => {
+                this.$refs['therapistInput_' + 0][0].focus()
+                this.$refs['therapistInput_' + 0][0].select()
+              })
+            }).catch(error => this.handleError(error))
     },
     confirmSave() {
       let unassignedCount = this.prescription.treatments.filter(t => !t.therapist).length
@@ -381,7 +385,7 @@ export default {
       }
     },
     savePrescription(msg) {
-      this.$api.put(`/prescriptions/${this.prescription.number}`, this.prescription)
+      this.$api.put(`/prescriptions/${this.prescription.id}`, this.prescription)
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.showSuccess('Die Änderungen wurden gespeichert')
@@ -421,7 +425,7 @@ export default {
         this.prescription.ignored = false
         this.savePrescription('Die Verordnung wird nun nicht mehr ignoriert.')
       } else
-        this.$api.delete(`/prescriptions/${this.prescription.number}`)
+        this.$api.delete(`/prescriptions/${this.prescription.id}`)
             .then(() => {
               this.prescription.ignored = true
               this.showInfo(`Die Verordnung ${this.prescription.number} wird in zukünftigen Suchen und Berichten ignoriert.`)
@@ -429,7 +433,7 @@ export default {
             }).catch(error => this.handleError(error))
     },
     disentanglePrescription() {
-      this.$api.put(`/prescriptions/${this.prescription.number}/disentangle`)
+      this.$api.put(`/prescriptions/${this.prescription.id}/disentangle`)
           .then(response => {
             this.prescriptionUpdated(response.data)
             this.showInfo('Die Behandlungen dieser Verordnungen können nun verschiedenen Therapeutinnen zugewiesen werden')
@@ -517,11 +521,11 @@ export default {
       this.loadPrescription()
     },
     reset() {
-      if(this.searchByPrescription)
+      if (this.searchByPrescription)
         this.prescriptionQuery = ''
-      if(this.searchByImport)
+      if (this.searchByImport)
         this.selectedImportedFileUpdated()
-      if(this.searchByDate)
+      if (this.searchByDate)
         this.dateUpdated()
     },
     treatmentBlockClass(position) {

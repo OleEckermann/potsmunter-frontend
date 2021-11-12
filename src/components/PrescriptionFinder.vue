@@ -17,7 +17,7 @@
                @focusout="$emit('focusout')"
                autofocus/>
         <datalist id="prescriptions">
-          <option v-for="entry in dataList" :key="entry" :value="entry"/>
+          <option v-for="entry in dataList" :key="entry.id" :value="getSearchResultFormat(entry)"/>
         </datalist>
       </div>
     </div>
@@ -52,13 +52,13 @@ export default {
   watch: {
     value: {
       immediate: true,
-      handler(newVal){
+      handler(newVal) {
         this.query = newVal
         this.prescriptionQueryUpdated()
       }
     },
-    focus(newVal){
-      if(newVal) {
+    focus(newVal) {
+      if (newVal) {
         this.$refs['prescriptionInput'].focus()
         this.$refs['prescriptionInput'].select()
       }
@@ -68,7 +68,7 @@ export default {
     prescriptionQueryUpdated() {
       if (this.dataList.indexOf(this.query) >= 0
           || !isAlphaNum(this.query))
-        this.prescriptionDataList = []
+        this.dataList = []
       else
         this.$api.get('/prescriptions', {
           params: {
@@ -81,9 +81,17 @@ export default {
         }).catch(error => this.handleError(error))
     },
     handlePrescriptionInput() {
-      if (this.dataList.indexOf(this.query) >= 0)
-        this.$emit('input', this.query)
+      const matchingEntryIdx = this.dataList
+          .map(entry => this.getSearchResultFormat(entry))
+          .indexOf(this.query)
+      if (matchingEntryIdx >= 0){
+        this.$emit('input', this.getSearchResultFormat(this.dataList[matchingEntryIdx]))
+        this.$emit('entryChanged', this.dataList[matchingEntryIdx])
+      }
     },
+    getSearchResultFormat(entry) {
+      return '[' + entry.number + '] ' + entry.patient
+    }
   },
 
 }
