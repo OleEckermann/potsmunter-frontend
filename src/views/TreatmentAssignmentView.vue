@@ -52,7 +52,7 @@
             ignorierte einbeziehen
           </label>
         </div>
-        <div class="field" v-if="searchByDate">
+        <div class="field" v-if="searchByDate || searchByImport">
           <label class="label m-auto pl-2" for="allowProcessedInput">
             <input id="onlyUnassigned"
                    class="control checkbox"
@@ -269,26 +269,25 @@ export default {
         this.selectedImportedFileUpdated()
     },
     includeIgnored() {
-      this.searchByDate ? this.dateUpdated() : this.prescriptionQueryUpdated()
+      this.searchByDate ? this.dateUpdated() : this.searchByImport ? this.selectedImportedFileUpdated() : this.prescriptionQueryUpdated()
     },
     queryAlreadyProcessed() {
-      this.searchByDate ? this.dateUpdated() : this.prescriptionQueryUpdated()
+      this.searchByDate ? this.dateUpdated() : this.searchByImport ? this.selectedImportedFileUpdated() : this.prescriptionQueryUpdated()
     },
     onlyUnassigned() {
-      if (this.searchByDate)
-        this.dateUpdated()
+      this.searchByDate ? this.dateUpdated() : this.searchByImport ? this.selectedImportedFileUpdated() : this.prescriptionQueryUpdated()
     },
     date() {
       this.dateUpdated()
     },
     workList() {
-      this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
+      this.prescriptionQueryEnty = this.workListIndex >= 0 ? this.workList[this.workListIndex] : null
     },
     prescriptionQueryEntry(){
       this.loadPrescription()
     },
     workListIndex() {
-      this.prescriptionQuery = this.workListIndex >= 0 ? this.workList[this.workListIndex] : ''
+      this.prescriptionQueryEntry = this.workListIndex >= 0 ? this.workList[this.workListIndex] : null
     }
   },
   methods: {
