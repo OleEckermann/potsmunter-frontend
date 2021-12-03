@@ -283,7 +283,7 @@ export default {
     workList() {
       this.prescriptionQueryEnty = this.workListIndex >= 0 ? this.workList[this.workListIndex] : null
     },
-    prescriptionQueryEntry(){
+    prescriptionQueryEntry() {
       this.loadPrescription()
     },
     workListIndex() {
@@ -476,8 +476,10 @@ export default {
       if (therapist) {
         const idx = this.treatments.indexOf(treatment);
         for (let i = idx; i < this.treatments.length; i++) {
-          this.treatments[i].therapistQuery = treatment.therapistQuery
-          this.treatments[i].therapist = therapist
+          if (!this.treatments[i].therapist) {
+            this.treatments[i].therapistQuery = treatment.therapistQuery
+            this.treatments[i].therapist = therapist
+          }
         }
         this.dirty = true
         if (idx + 1 < this.treatments.length) {
@@ -523,8 +525,10 @@ export default {
       this.loadPrescription()
     },
     reset() {
-      if (this.searchByPrescription)
+      if (this.searchByPrescription){
         this.prescriptionQuery = ''
+        this.prescriptionQueryEntry = null
+      }
       if (this.searchByImport)
         this.selectedImportedFileUpdated()
       if (this.searchByDate)

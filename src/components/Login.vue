@@ -30,7 +30,7 @@
         <validation-provider vid="general" v-slot="{errors}">
           <div class="control">
             <input class="button is-primary"
-                   :class="{'is-loading': isLoading}"
+                   :class="{'is-loading': loading}"
                    :disabled="invalid"
                    type="submit" value="Anmelden"/>
           </div>
@@ -54,7 +54,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['isLoading'])
+    ...mapGetters(['loading'])
   },
   methods: {
     ...mapActions(['login']),
