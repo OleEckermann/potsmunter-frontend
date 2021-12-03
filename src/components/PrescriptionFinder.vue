@@ -49,6 +49,20 @@ export default {
       dataList: []
     }
   },
+  computed: {
+    duplicateNumbers(){
+      const alreadyParsed = []
+      const res = []
+      for(let number of this.dataList.map(e => e.number)){
+        if(alreadyParsed.indexOf(number) >= 0){
+          res.push(number)
+        } else {
+          alreadyParsed.push(number)
+        }
+      }
+      return res
+    }
+  },
   watch: {
     value: {
       immediate: true,
@@ -89,8 +103,11 @@ export default {
         this.$emit('entryChanged', this.dataList[matchingEntryIdx])
       }
     },
+    isDuplicate(entry){
+      return this.duplicateNumbers.indexOf(entry.number) >= 0
+    },
     getSearchResultFormat(entry) {
-      return '[' + entry.number + '] ' + entry.patient
+      return '[' + entry.number + '] ' + entry.patient + (this.isDuplicate(entry) ? ' (' + entry.invoiceNumber + ')': '')
     }
   },
 
