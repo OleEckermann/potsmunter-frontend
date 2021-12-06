@@ -121,29 +121,30 @@ export default {
         try {
           let text = evt.target.result;
           let lines = text.split('\n');
-          this.uploadStatus.totalEntries = lines.length - 2
           const header = lines[0]
+          let totalEntries = 0
           let prescriptions = new Map()
           for (let row = 1; row < lines.length; row++) {
-            let entry = lines[row]
-            let prescriptionNumber = entry.split(';')[8]
-            if (prescriptionNumber && prescriptionNumber !== '') {
-              if (!prescriptions.has(prescriptionNumber)) {
-                prescriptions.set(prescriptionNumber, '')
+            let entry = lines[row].split(';')
+            if (entry.length > 8) {
+              let prescriptionKey = entry[0] + ';' + entry[8]
+              if (!prescriptions.has(prescriptionKey)) {
+                prescriptions.set(prescriptionKey, '')
               }
-              prescriptions.set(prescriptionNumber, prescriptions.get(prescriptionNumber) + entry + '\n')
+              prescriptions.set(prescriptionKey, prescriptions.get(prescriptionKey) + lines[row] + '\n')
+              totalEntries++
             }
           }
-          for (const [prescriptionNumber, csv] of prescriptions) {
+          this.uploadStatus.totalEntries = totalEntries
+          for (const [prescriptionKey, csv] of prescriptions) {
             if (!this.uploadStatus.processing)
               break
             this.uploadStatus.currentEntry = '...' + csv.slice(46, 46 + Math.min(csv.length - 46, 80)) + '...'
-            const invoiceNumber = csv.split(';')[0]
             await this.$api.post('/imports', {
-              prescriptionNumber: prescriptionNumber,
+              invoiceNumber: prescriptionKey.split(';')[0],
+              prescriptionNumber: prescriptionKey.split(';')[1],
               treatmentsCSV: header + '\n' + csv,
-              importFilename: this.selectedFile.name,
-              invoiceNumber: invoiceNumber
+              importFilename: this.selectedFile.name
             }).then(response => {
               const results = response.data
               this.uploadStatus.entriesProcessed += results.length
