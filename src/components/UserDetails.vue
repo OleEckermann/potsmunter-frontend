@@ -77,15 +77,26 @@ export default {
     submit() {
       if (this.password)
         this.editedUser.credentials.password = this.password
-      this.$api.post('/users', this.editedUser).then(response => {
-        this.$toast.info('Die Änderungen wurden gespeichert.')
-        this.$emit('update', response.data)
-      }).catch(error => {
-        if (error.response && error.response.status === 400)
-          this.$refs.formStatus.setErrors(error.response.data)
-        else
-          this.$toast.error('' + error.message)
-      })
+      if(this.editedUser.id)
+        this.$api.put(`/users/${this.editedUser.id}`, this.editedUser).then(response => {
+          this.$toast.info('Die Änderungen wurden gespeichert.')
+          this.$emit('update', response.data)
+        }).catch(error => {
+          if (error.response && error.response.status === 400)
+            this.$refs.formStatus.setErrors(error.response.data)
+          else
+            this.$toast.error('' + error.message)
+        })
+      else
+        this.$api.post('/users', this.editedUser).then(response => {
+          this.$toast.info('Der Nutzer wurde angelegt.')
+          this.$emit('update', response.data)
+        }).catch(error => {
+          if (error.response && error.response.status === 400)
+            this.$refs.formStatus.setErrors(error.response.data)
+          else
+            this.$toast.error('' + error.message)
+        })
     },
     deleteUser() {
       this.$api.delete(`/users/${this.editedUser.id}`).then(() => {
