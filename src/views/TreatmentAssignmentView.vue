@@ -31,36 +31,29 @@
           <imported-file-selector @input="selectedImportedFile = $event"/>
         </div>
       </div>
-      <div class="is-flex is-flex-direction-column is-flex-grow-1 ml-4">
-        <div class="field">
-          <label class="label m-auto pl-2" for="allowProcessedInput">
-            <input id="allowProcessedInput"
-                   class="control checkbox"
-                   type="checkbox"
-                   v-model="queryAlreadyProcessed"
-                   tabindex="-1"/>
-            abgerechnete einbeziehen
-          </label>
+      <div class="ml-4 fa-border">
+        <div>
+          <input id="allowProcessedInput"
+                 class="control checkbox"
+                 type="checkbox"
+                 v-model="queryAlreadyProcessed"
+                 tabindex="-1"/> abgerechnete einbeziehen
         </div>
-        <div class="field">
-          <label class="label m-auto pl-2" for="allowProcessedInput">
-            <input id="includeIgnored"
-                   class="control checkbox"
-                   type="checkbox"
-                   v-model="includeIgnored"
-                   tabindex="-1"/>
-            ignorierte einbeziehen
-          </label>
+        <div>
+          <input id="includeIgnored"
+                 class="control checkbox"
+                 type="checkbox"
+                 v-model="includeIgnored"
+                 tabindex="-1"/>
+          ignorierte einbeziehen
         </div>
-        <div class="field" v-if="searchByDate || searchByImport">
-          <label class="label m-auto pl-2" for="allowProcessedInput">
-            <input id="onlyUnassigned"
-                   class="control checkbox"
-                   type="checkbox"
-                   v-model="onlyUnassigned"
-                   tabindex="-1"/>
-            nur nicht zugewiesene
-          </label>
+        <div v-if="searchByDate || searchByImport">
+          <input id="onlyUnassigned"
+                 class="control checkbox"
+                 type="checkbox"
+                 v-model="onlyUnassigned"
+                 tabindex="-1"/>
+          nur nicht zugewiesene
         </div>
       </div>
     </div>
@@ -219,15 +212,15 @@ export default {
       searchByPrescription: true,
       searchByDate: false,
       searchByImport: false,
-      date: null,
-      prescriptionQuery: '',
-      prescriptionQueryEntry: null,
+      date: DateTime.now(),
+      prescriptionQuery: '', // value (string) of PrescriptionFinder input field
+      prescriptionQueryEntry: null, // value (object) of PrescriptionFinder ({id, invoiceNumber, number, patient})
       selectedImportedFile: {id: -1},
       focusPrescriptionQuery: true,
-      queryAlreadyProcessed: false,
-      includeIgnored: false,
-      onlyUnassigned: false,
-      prescription: null,
+      queryAlreadyProcessed: false, // filter switch value
+      includeIgnored: false,  // filter switch value
+      onlyUnassigned: false, // filter switch value
+      prescription: null, // displayed prescription
       therapistQuery: '',
       therapistDataList: [],
       dirty: false,
@@ -257,13 +250,6 @@ export default {
         }
       }
     },
-    searchByDate(turnedOn) {
-      if (turnedOn) {
-        this.date = DateTime.now()
-      } else {
-        this.prescriptionQueryUpdated()
-      }
-    },
     selectedImportedFile(newVal) {
       if (newVal)
         this.selectedImportedFileUpdated()
@@ -280,8 +266,8 @@ export default {
     date() {
       this.dateUpdated()
     },
-    workList() {
-      this.prescriptionQueryEnty = this.workListIndex >= 0 ? this.workList[this.workListIndex] : null
+    workList(newWorkList) {
+      this.prescriptionQueryEntry = newWorkList?.length > 0 ? this.workList[0] : null
     },
     prescriptionQueryEntry() {
       this.loadPrescription()
@@ -293,6 +279,7 @@ export default {
   methods: {
     ...mapActions(['startLoading', 'stopLoading']),
     searchBy(searchType) {
+      this.reset()
       this.searchByDate = false
       this.searchByPrescription = false
       this.searchByImport = false
@@ -327,7 +314,7 @@ export default {
       if (entry)
         this.prescriptionQueryEntry = entry
       else
-        this.prescription = null
+        this.prescriptionQuery = null
     },
     selectedImportedFileUpdated() {
       this.startLoading('lade Verordnungsliste')
@@ -367,6 +354,8 @@ export default {
                 this.$refs['therapistInput_' + 0][0].select()
               })
             }).catch(error => this.handleError(error))
+      else
+        this.prescription = null
     },
     confirmSave() {
       let unassignedCount = this.prescription.treatments.filter(t => !t.therapist).length
@@ -525,14 +514,11 @@ export default {
       this.loadPrescription()
     },
     reset() {
-      if (this.searchByPrescription){
-        this.prescriptionQuery = ''
-        this.prescriptionQueryEntry = null
-      }
-      if (this.searchByImport)
-        this.selectedImportedFileUpdated()
-      if (this.searchByDate)
-        this.dateUpdated()
+      this.prescriptionQuery = ''
+      this.prescriptionQueryEntry = null
+      this.selectedImportedFile = null
+      this.date = DateTime.now()
+      this.prescription = null
     },
     treatmentBlockClass(position) {
       const block1 = [21302, 21303, 21310, 21312, 21501, 21517, 21530, 21531, 21532, 21533, 21534, 21703, 21705, 21708, 21710, 21712, 21714, 21720, 21732, 21733, 21801]

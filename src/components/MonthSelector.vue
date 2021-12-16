@@ -1,7 +1,7 @@
 <template>
   <div v-if="value">
     <span class="icon button" @click="navigate(-1)"><icon icon="chevron-left"></icon></span>
-    {{ value.toFormat('MMMM') }}&nbsp;{{ value.toFormat('yy') }}
+    {{ value.toFormat('MMMM', {locale: 'DE'}) }}&nbsp;{{ value.toFormat('yy') }}
     <span class="icon button" @click="navigate(1)"><icon icon="chevron-right"></icon></span>
   </div>
 </template>
@@ -13,7 +13,7 @@ export default {
   props: {
     value: {
       type: Object,
-      default: () => DateTime.now().setLocale('de'),
+      default: () => DateTime.now()
     }
   },
   methods: {
