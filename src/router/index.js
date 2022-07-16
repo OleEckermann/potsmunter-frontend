@@ -30,6 +30,11 @@ const routes = [
     component: () => import('../views/UserManagementView.vue')
   },
   {
+    path: '/ttoolsDatev',
+    name: 'ttoolsDatev',
+    component: () => import('../views/TtoolsDatevView.vue')
+  },
+  {
     path: '/importieren',
     name: 'import',
     component: () => import('../views/FileUploadView.vue')
