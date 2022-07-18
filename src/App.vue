@@ -1,15 +1,18 @@
 <template>
   <div id="app">
     <loading-overlay/>
-    <navigation/>
-    <div class="container" >
-      <router-view class="mt-5"/>
+    <navigation v-if="readyToUse"/>
+    <div class="container" v-if="readyToUse">
+      <router-view class="mt-5" v-if="readyToUse"/>
     </div>
-    
+    <div class="container" v-else>
+      <LoginView/>
+    </div>
   </div>
 </template>
 
 <script>
+import LoginView from "@/views/LoginView";
 import Navigation from "@/components/Navigation"
 import {mapGetters} from "vuex";
 import LoadingOverlay from "@/components/LoadingOverlay";
@@ -18,6 +21,6 @@ export default {
   computed: {
     ...mapGetters(['readyToUse']),
   },
-  components: {Navigation, LoadingOverlay}
+  components: {LoginView, Navigation, LoadingOverlay}
 }
 </script>

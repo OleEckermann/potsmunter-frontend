@@ -1,5 +1,7 @@
 
-import * as moment from '@/plugins/moment.js';
+
+let moment = require('./momentwithlocales');
+moment.locale('de')
 
 export async function generateDocumentXml(producedDocs) {
 
@@ -63,15 +65,15 @@ export async function generateDocumentXml(producedDocs) {
         // Repository
         const repository = doc.createElement("repository");
 
-        repositoryLevel = doc.createElement("level");
+        const repositoryLevel = doc.createElement("level");
         repositoryLevel.setAttribute('id', '1');
         repositoryLevel.setAttribute('name', 'Buchführung')
 
-        repositorySecondLevel = doc.createElement("level");
+        const repositorySecondLevel = doc.createElement("level");
         repositorySecondLevel.setAttribute('id', '2');
         repositorySecondLevel.setAttribute('name', 'Buchhaltung ' + onlyYear);
 
-        repositoryThirdLevel = doc.createElement("level");
+        const repositoryThirdLevel = doc.createElement("level");
         repositoryThirdLevel.setAttribute('id', '3');
         repositoryThirdLevel.setAttribute('name', 'Standardregister');
 

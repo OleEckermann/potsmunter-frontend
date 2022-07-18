@@ -2,6 +2,7 @@
   <div class="block">
     <div class="title">Schnittstelle ttools/Datev Unternehmen online</div>
     <div class="content box">
+    <label>1. CSV Datei auswählen</label>
       <div class="field">
         <div class="file has-name is-fullwidth">
           <label class="file-label">
@@ -17,7 +18,7 @@
                 <icon icon="upload"></icon>
               </span>
               <span class="file-label">
-                CSV-Datei wählen
+                CSV
               </span>
             </span>
             <span class="file-name">
@@ -27,7 +28,8 @@
           
         </div>
       </div>
-
+      
+      <label>2. Rechnungen hochladen</label>
       <div class="field">
         <div class="file has-name is-fullwidth">
           <label class="file-label">
@@ -43,7 +45,7 @@
                 <icon icon="upload"></icon>
               </span>
               <span class="file-label">
-                PDF WAHLEN TAH
+                PDF
               </span>
             </span>
             <span class="file-name">
@@ -53,9 +55,12 @@
           
         </div>
       </div>
-      <div  id="result" style="display: block"></div>
-
-      <button id="btn" class="button is-primary" @click="convert()">Datei erstellen</button>
+      <div  id="result" style="display: none"></div>
+      <p class="label">(Die Datei wird generiert und automatisch runtergeladen)</p>
+      <div class="content-padding" style="padding: 10px; overflow: hidden">
+        <button id="btn" class="button is-primary is-pulled-right" @click="convert()">Datei erstellen</button>
+      </div>
+      
     </div>
     
   </div>
@@ -68,15 +73,17 @@
 
     import {PDFDocument} from '@/plugins/pdf-lib.min.js';
     import '@/plugins/downloadjs.js';
-    import '@/plugins/jszip.js';
+    import JSZip from '@/plugins/jszip.js';
     import * as pdfjs from '@/plugins/pdf.js';
     import '@/plugins/pdf.worker.js';
     import '@/plugins/FileSaver.js';
     import '@/plugins/jquery.min.js';
     import * as XMLGen from '@/plugins/xmlGenerator.js';
-    import vkbeautify from '@/plugins/vkbeautify.js';
+    import {xml} from '@/plugins/vkbeautify.js';
     import mars from '@/plugins/customFile.js';
+    import moment from '@/plugins/momentwithlocales.js';
 
+    var zip = new JSZip();
     const pagesToExport = [];
     const docsToProduce = [];
     const producedDocs = [];
@@ -228,7 +235,7 @@
 
                         if(doc.csvObject.Rechnungsart === 'Einzelrechnung Kasse' || doc.csvObject.Rechnungsart === 'Kasse') {
                             customerName = doc.csvObject.Krankenkasse;
-                        } else if(doc.csvObject.Rechnungsart === 'Privat' || doc.csvObject.Rechnungsart === 'Ausfallrechnung'
+                        } else if(doc.csvObject.Rechnungsart === 'Privat' || doc.csvObject.Rechnungsart === 'Ausfall'
                         || doc.csvObject.Rechnungsart === 'Privat (HP)') {
                             customerName = doc.csvObject.Vorname + ' ' + doc.csvObject.Name;
                             consolidatedAmount = doc.csvObject.gesamtBrutto;
@@ -284,6 +291,7 @@
               zip.file("document.XML", docXml);
 
               let todayDate = moment(new Date()).format('DD.MM.YYYYTHH:MM:ss');
+              console.log(todayDate);
 
             // Generate ZIP and trigger download 
             zip.generateAsync({type:"blob"})
@@ -367,7 +375,7 @@
 
 
             for (var obj of csvObjects) {
-                if(obj.Rechnungsart == 'Privat' || obj.Rechnungsart == 'Kasse' || obj.Rechnungsart == 'Einzelrechnung Kasse' || obj.Rechnungsart == 'Privat (HP)') {
+                if(obj.Rechnungsart == 'Privat' || obj.Rechnungsart == 'Kasse' || obj.Rechnungsart == 'Einzelrechnung Kasse' || obj.Rechnungsart == 'Privat (HP)' || obj.Rechnungsart == 'Ausfall') {
                     if(obj.Rechnungsnummer) {
                         var invoiceNum = JSON.stringify(obj.Rechnungsnummer);
                         if(invoiceNum != '') {
