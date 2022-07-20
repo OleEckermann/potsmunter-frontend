@@ -71,6 +71,7 @@
     // We need to disable es lint because of external libraries
     /* eslint-disable */ 
 
+    import {mapActions} from "vuex";
     import {PDFDocument} from '@/plugins/pdf-lib.min.js';
     import '@/plugins/downloadjs.js';
     import JSZip from '@/plugins/jszip.js';
@@ -103,6 +104,8 @@
         }
       },
       methods: {
+        ...mapActions(['startLoading', 'stopLoading']),
+        
         pdfToText(data, callbackPageDone, callbackAllDone, copyPagesCallback) {
           import('@/plugins/pdf.js').then((pdfjsLib) => {
           pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -273,6 +276,7 @@
                         doc.invoiceNum.toString(), customerName, doc.csvObject.Datum, "EUR", consolidatedAmount, taxAmount, "dueDate", "bookingText", _information)
                         xml = vkbeautify.xml(xml, 5);
                         zip.file(doc.invoiceNum + ".XML", xml);
+                        this.stopLoading();
 
                         // Serialize the PDFDocument to bytes (a Uint8Array)
                         zip.file(doc.invoiceNum + ".pdf", pdfBytes2, {binary: true});
@@ -310,6 +314,7 @@
 
         // CONVERT 
         convert() {
+          this.startLoading('laden...')
           var fr=new FileReader();
           fr.onload=(event) => {
               this.pdfToText(fr.result, null, (text) => { document.getElementById('result').innerText += text; }, this.copyPages);

@@ -68,6 +68,15 @@
       </div>
 
       <div class="navbar-end">
+        <router-link v-slot="{navigate}"
+                     :to="{name: 'ttoolsDatev'}"
+                     custom>
+          <a class="navbar-item is-tab"
+             :class="{'is-active': $route.name === 'ttoolsDatev'}"
+             @click="navigate">
+            ttools2Datev
+          </a>
+        </router-link>
         <div class="navbar-item" v-if="user">
           <div class="icon-text has-icons-right">
             <span>{{ user.name }}</span>
