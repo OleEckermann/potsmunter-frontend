@@ -150,15 +150,16 @@
                                         full_text += layers[j];
 
                                         for(let doc of docsToProduce) {
-                                          if(doc.csvObject.Zahlungsart !== 0) {
+                                          if(doc.csvObject.Zahlungsart !== '0') {
                                             if(doc.csvObject.gesamtBrutto !== '0.00' && doc.csvObject.gesamtNetto !== '0.00')
                                               if(layers[j].includes(doc.invoiceNum) && layers[j].includes('Gesamt (EUR)')) {
                                                   doc.exportPages.push(j-1);
                                               }
                                           }
-                                            
+                                          
                                         }
                                     }
+
                                         
                                     
                                     callbackAllDone(full_text);
@@ -286,6 +287,8 @@
                         zip.file(doc.invoiceNum + ".pdf", pdfBytes2, {binary: true});
 
                         producedDocs.push(doc);
+                    } else {
+                      this.stopLoading();
                     }
                 }
                 // download(pdfBytes2, "ime.pdf", "application/pdf");
