@@ -54,17 +54,6 @@
             Nutzerinnen
           </a>
         </router-link>
-
-        <router-link v-slot="{navigate}"
-                     :to="{name: 'ttoolsDatev'}"
-                     custom>
-          <a class="navbar-item is-tab"
-             :class="{'is-active': $route.name === 'ttoolsDatev'}"
-             @click="navigate">
-            ttools2Datev
-          </a>
-        </router-link>
-
       </div>
 
       <div class="navbar-end">
