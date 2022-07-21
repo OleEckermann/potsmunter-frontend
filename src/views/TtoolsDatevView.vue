@@ -150,9 +150,13 @@
                                         full_text += layers[j];
 
                                         for(let doc of docsToProduce) {
-                                            if(layers[j].includes(doc.invoiceNum) && layers[j].includes('Gesamt (EUR)')) {
-                                                doc.exportPages.push(j-1);
-                                            }
+                                          if(doc.csvObject.Zahlungsart !== 0) {
+                                            if(doc.csvObject.gesamtBrutto !== '0.00' && doc.csvObject.gesamtNetto !== '0.00')
+                                              if(layers[j].includes(doc.invoiceNum) && layers[j].includes('Gesamt (EUR)')) {
+                                                  doc.exportPages.push(j-1);
+                                              }
+                                          }
+                                            
                                         }
                                     }
                                         
@@ -339,7 +343,7 @@
         getAsText(fileToRead) {
           var reader = new FileReader();
           // Read file into memory as UTF-8      
-          reader.readAsText(fileToRead);
+          reader.readAsText(fileToRead, 'ISO-8859-1');
           
           // Handle errors load
           reader.onload = this.loadHandler;
