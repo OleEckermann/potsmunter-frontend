@@ -151,7 +151,7 @@
 
                                         for(let doc of docsToProduce) {
                                           if(doc.csvObject.Zahlungsart !== '0') {
-                                            if(doc.csvObject.gesamtBrutto !== '0.00' && doc.csvObject.gesamtNetto !== '0.00')
+                                            if(doc.csvObject.gesamtBrutto !== '0.00' && doc.csvObject.gesamtNetto !== '0.00' && doc.csvObject.gesamtZuzahlung !== '0.00' && doc.csvObject.Zuzahlung !== '0.00')
                                               if(layers[j].includes(doc.invoiceNum) && layers[j].includes('Gesamt (EUR)')) {
                                                   doc.exportPages.push(j-1);
                                               }
